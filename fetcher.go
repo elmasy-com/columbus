@@ -69,6 +69,9 @@ var (
 	tldFilePath    string   // Path of the TLDs
 
 	domainChan chan string // Channel to send data from fetchDomain() to writer()
+
+	CheckUnique bool // Check the uniqueness of the log entry
+	OnlyFull    bool // Only write full hostnames, skip sub/tld/domain
 )
 
 func updateURI(name string, index int) error {
@@ -145,7 +148,7 @@ func saveIndex(dir string) error {
 // signal context will terminate this, but a last save will happen at the end of Fetch()
 func backgroundSave(ctx context.Context, dir string) {
 
-	waitUntil := time.Now().Add(10 * time.Minute)
+	waitUntil := time.Now().Add(1 * time.Minute)
 
 	for {
 
@@ -160,7 +163,7 @@ func backgroundSave(ctx context.Context, dir string) {
 					fmt.Fprintf(os.Stderr, "Failed to save indexes: %s\n", err)
 				}
 
-				waitUntil = time.Now().Add(10 * time.Minute)
+				waitUntil = time.Now().Add(1 * time.Minute)
 			}
 
 			time.Sleep(10 * time.Second)
@@ -197,11 +200,14 @@ func writeFull(wg *sync.WaitGroup, d []byte) {
 
 	defer wg.Done()
 
-	if exist, err := isExist(fullFilePath, d); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeFull(): %s\n", d, err)
-		return
-	} else if exist {
-		return
+	if CheckUnique {
+
+		if exist, err := isExist(fullFilePath, d); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeFull(): %s\n", d, err)
+			return
+		} else if exist {
+			return
+		}
 	}
 
 	fullFile.Write(d)
@@ -213,17 +219,24 @@ func writeSub(wg *sync.WaitGroup, d string) {
 
 	defer wg.Done()
 
+	if OnlyFull {
+		return
+	}
+
 	s := domain.GetSub(d)
 
 	if s == "" || s == "*" {
 		return
 	}
 
-	if exist, err := isExist(subFilePath, []byte(s)); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeSub(): %s\n", s, err)
-		return
-	} else if exist {
-		return
+	if CheckUnique {
+
+		if exist, err := isExist(subFilePath, []byte(s)); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeSub(): %s\n", s, err)
+			return
+		} else if exist {
+			return
+		}
 	}
 
 	subFile.WriteString(s)
@@ -235,17 +248,24 @@ func writeDomain(wg *sync.WaitGroup, d string) {
 
 	defer wg.Done()
 
+	if OnlyFull {
+		return
+	}
+
 	v := domain.GetDomain(d)
 
 	if v == "" {
 		return
 	}
 
-	if exist, err := isExist(domainFilePath, []byte(v)); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeDomain(): %s\n", v, err)
-		return
-	} else if exist {
-		return
+	if CheckUnique {
+
+		if exist, err := isExist(domainFilePath, []byte(v)); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeDomain(): %s\n", v, err)
+			return
+		} else if exist {
+			return
+		}
 	}
 
 	domainFile.WriteString(v)
@@ -257,24 +277,30 @@ func writeTLD(wg *sync.WaitGroup, d string) {
 
 	defer wg.Done()
 
+	if OnlyFull {
+		return
+	}
+
 	v := domain.GetTLD(d)
 
 	if v == "" {
 		return
 	}
 
-	if exist, err := isExist(tldFilePath, []byte(v)); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeTLD(): %s\n", v, err)
-		return
-	} else if exist {
-		return
+	if CheckUnique {
+		if exist, err := isExist(tldFilePath, []byte(v)); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to check the existence of %s in writeTLD(): %s\n", v, err)
+			return
+		} else if exist {
+			return
+		}
 	}
 
 	tldFile.WriteString(v)
 	tldFile.WriteString("\n")
 }
 
-// writer is used to write the lists, this function is the bottleneck of this program.
+// writer is used to write the lists, *this function is the bottleneck of this program* when used with CheckUnique.
 // First it check the existence of the domain with isExist, then write it (if unique).
 // This function stopped when the domainChan is closed at the end of the Fetch().
 // TODO: How to make this faster!?
@@ -444,6 +470,8 @@ func fetcher(wg *sync.WaitGroup, ctx context.Context, l *log) {
 			}
 		}
 	}
+
+	fmt.Printf("%s -> Finished parsing %d logs!\n", l.Name, l.Index)
 }
 
 func Fetch(dir string) error {

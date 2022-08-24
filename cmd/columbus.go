@@ -14,6 +14,8 @@ func main() {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
 	dir := flag.String("dir", "", "Path to directory to store the files")
+	flag.BoolVar(&columbus.CheckUnique, "check", false, "Check the uniqueness of the log entry")
+	flag.BoolVar(&columbus.OnlyFull, "full", false, "Only write full hostnames")
 
 	flag.Parse()
 
