@@ -87,6 +87,7 @@ func updateURI(name string, index int) error {
 	return fmt.Errorf("URI for %s not found", name)
 }
 
+// Load the log.Index from the svaed file.
 func readIndex(dir string) error {
 
 	if _, err := os.Stat(dir + "/columbus.index"); os.IsNotExist(err) {
@@ -119,6 +120,7 @@ func readIndex(dir string) error {
 	return nil
 }
 
+// Save url.Index.
 func saveIndex(dir string) error {
 
 	file, err := os.OpenFile(dir+"/columbus.index", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
@@ -365,12 +367,14 @@ func fetcher(wg *sync.WaitGroup, ctx context.Context, l *log) {
 	fmt.Printf("%s -> Number of logs: %d\n", l.Name, sth.TreeSize)
 
 	// Number of seconds to wait in case of "429 Too Many Requests"
-	toWait := 20
+	toWait := 0
 
 	// Logs MAY return fewer than the number of leaves requested. Only complete
 	// if we actually got all the leaves we were expecting.
 	// See more: https://github.com/google/certificate-transparency-go/blob/52d94d8cbab94d6698621839ab1a439d17ebbfb2/scanner/fetcher.go#L263
 	for uint64(l.Index) < sth.TreeSize {
+
+		time.Sleep(time.Duration(toWait) * time.Second)
 
 		select {
 		case <-ctx.Done():
@@ -388,9 +392,8 @@ func fetcher(wg *sync.WaitGroup, ctx context.Context, l *log) {
 				// Sleep 1 minutes if too many request
 				// TODO: context have to wait 1 minute to terminate
 				if strings.Contains(err.Error(), "429 Too Many Requests") {
-					fmt.Fprintf(os.Stderr, "%s -> Failed to get raw entries: %s. Waiting for %d seconds to retry...\n", l.Name, err, toWait)
-					time.Sleep(time.Duration(toWait) * time.Second)
 					toWait += 10
+					fmt.Fprintf(os.Stderr, "%s -> Failed to get raw entries: %s. Waiting for %d seconds to retry...\n", l.Name, err, toWait)
 					continue
 				}
 
