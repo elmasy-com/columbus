@@ -250,6 +250,10 @@ github.com/elmasy-com/elnet v0.0.0-20220815173036-8f50017b2805 h1:Mg+h3K5PlJ5EEF
 github.com/elmasy-com/elnet v0.0.0-20220815173036-8f50017b2805/go.mod h1:beWPyFK66Hf8eQgE8OWJVmtDWbxrekU+ZuVT9yN7ihw=
 github.com/elmasy-com/elnet v0.0.0-20220815182300-924829a92c76 h1:F9Cps9LX19q40GlHrKeOhHIfYGG5zAIoNR2HdV/8y2U=
 github.com/elmasy-com/elnet v0.0.0-20220815182300-924829a92c76/go.mod h1:beWPyFK66Hf8eQgE8OWJVmtDWbxrekU+ZuVT9yN7ihw=
+github.com/elmasy-com/elnet v0.0.0-20220901100041-2417ac5ee8e3 h1:7ORq011x+ZFeCl3bwbi2X/rfASBk8GV9TfZ1yNek6t4=
+github.com/elmasy-com/elnet v0.0.0-20220901100041-2417ac5ee8e3/go.mod h1:beWPyFK66Hf8eQgE8OWJVmtDWbxrekU+ZuVT9yN7ihw=
+github.com/elmasy-com/elnet v0.0.0-20220903111327-1768d5416796 h1:02khFAZ/jCo84FTsbFWi6fFy27lT0VH97Z16gTcuoXM=
+github.com/elmasy-com/elnet v0.0.0-20220903111327-1768d5416796/go.mod h1:beWPyFK66Hf8eQgE8OWJVmtDWbxrekU+ZuVT9yN7ihw=
 github.com/emirpasic/gods v1.12.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/envoyproxy/go-control-plane v0.6.9/go.mod h1:SBwIajubJHhxtWwsL9s8ss4safvEdbitLhGGK48rN6g=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

@@ -3,7 +3,7 @@ module github.com/elmasy-com/columbus
 go 1.19
 
 require (
-	github.com/elmasy-com/elnet v0.0.0-20220815182300-924829a92c76
+	github.com/elmasy-com/elnet v0.0.0-20220903111327-1768d5416796
 	github.com/google/certificate-transparency-go v1.1.3
 )
 
