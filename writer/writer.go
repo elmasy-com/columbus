@@ -16,8 +16,8 @@ var (
 	CheckUnique bool               // Check the uniqueness of the log entry
 	OnlyFull    bool               // Only write full hostnames, skip sub/tld/domain
 	WorkingDir  string             // Working directory
-	BuffSize    int         = 2048 // Size of domain buffer
-	NumFiles    int         = 1024 // Number of files to distribute entries
+	BuffSize    int         = 512  // Size of domain buffer
+	NumFiles    int         = 2048 // Number of files to distribute entries
 	domainChan  chan string        // Channel to send data from fetchDomain() to writer()
 	fullFiles   []*os.File         // Files to write the full hostnames
 	subFiles    []*os.File         // Files to write the subdomains
@@ -227,6 +227,8 @@ func StartWriter() error {
 
 			fullFiles = append(fullFiles, file)
 		}
+
+		fmt.Printf("Full files path: %s/full/{0-%d}\n", WorkingDir, NumFiles-1)
 	}
 
 	// Create ./sub and the files
@@ -253,6 +255,8 @@ func StartWriter() error {
 
 			subFiles = append(subFiles, file)
 		}
+
+		fmt.Printf("Sub files path: %s/sub/{0-%d}\n", WorkingDir, NumFiles-1)
 	}
 
 	// Create ./domain and the files
@@ -279,6 +283,8 @@ func StartWriter() error {
 
 			domainFiles = append(domainFiles, file)
 		}
+
+		fmt.Printf("Domain files path: %s/domain/{0-%d}\n", WorkingDir, NumFiles-1)
 	}
 
 	// Create tld file without folder, the numver of tlds are far less than the others
@@ -289,7 +295,7 @@ func StartWriter() error {
 		if err != nil {
 			return fmt.Errorf("failed to open %s: %s", path, err)
 		}
-		fmt.Printf("Path of the TLDs: %s\n", path)
+		fmt.Printf("TLD file path: %s\n", path)
 
 	}
 

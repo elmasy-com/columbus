@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/elmasy-com/columbus/writer"
+	"github.com/elmasy-com/slices"
 	ct "github.com/google/certificate-transparency-go"
 	"github.com/google/certificate-transparency-go/client"
 	"github.com/google/certificate-transparency-go/jsonclient"
@@ -30,7 +31,6 @@ type log struct {
 
 var (
 	USER_AGENT = "Elmasy-Columbus/0.1-dev"
-	DEBUG_MODE = false
 
 	// From https://www.gstatic.com/ct/log_list/log_list.json
 	URIS = []log{
@@ -224,10 +224,6 @@ func (l *log) GetRawEntries(start, end int64) ([]ct.LeafEntry, error) {
 		return nil, fmt.Errorf("entries is nil")
 	}
 
-	if DEBUG_MODE {
-		fmt.Printf("%s -> Got %d raw entry\n", l.Name, len(entries.Entries))
-	}
-
 	return entries.Entries, nil
 }
 
@@ -310,32 +306,51 @@ func backgroundSave(ctx context.Context) {
 // fetch domains from LogEntry and send it to domainChan
 func fetchDomain(e *ct.LogEntry) {
 
+	// Use this with slices.Contain() to filter duplicated domains.
+	domains := make([]string, 0)
+
 	// Fetch domains from cert and send it to writer through domainChan
 	if e.X509Cert != nil {
 
-		writer.Write(e.X509Cert.Subject.CommonName)
+		if !slices.Contain(domains, e.X509Cert.Subject.CommonName) {
+			domains = append(domains, e.X509Cert.Subject.CommonName)
+		}
 
 		for i := range e.X509Cert.DNSNames {
-			writer.Write(e.X509Cert.DNSNames[i])
+			if !slices.Contain(domains, e.X509Cert.DNSNames[i]) {
+				domains = append(domains, e.X509Cert.DNSNames[i])
+			}
 		}
 
 		for i := range e.X509Cert.PermittedDNSDomains {
-			writer.Write(e.X509Cert.PermittedDNSDomains[i])
+			if !slices.Contain(domains, e.X509Cert.PermittedDNSDomains[i]) {
+				domains = append(domains, e.X509Cert.PermittedDNSDomains[i])
+			}
 		}
 	}
 
 	// Fetch domains from precert and send it to writer through domainChan
 	if e.Precert != nil && e.Precert.TBSCertificate != nil {
 
-		writer.Write(e.Precert.TBSCertificate.Subject.CommonName)
+		if !slices.Contain(domains, e.Precert.TBSCertificate.Subject.CommonName) {
+			domains = append(domains, e.Precert.TBSCertificate.Subject.CommonName)
+		}
 
 		for i := range e.Precert.TBSCertificate.DNSNames {
-			writer.Write(e.Precert.TBSCertificate.DNSNames[i])
+			if !slices.Contain(domains, e.Precert.TBSCertificate.DNSNames[i]) {
+				domains = append(domains, e.Precert.TBSCertificate.DNSNames[i])
+			}
 		}
 
 		for i := range e.Precert.TBSCertificate.PermittedDNSDomains {
-			writer.Write(e.Precert.TBSCertificate.PermittedDNSDomains[i])
+			if !slices.Contain(domains, e.Precert.TBSCertificate.PermittedDNSDomains[i]) {
+				domains = append(domains, e.Precert.TBSCertificate.PermittedDNSDomains[i])
+			}
 		}
+	}
+
+	for i := range domains {
+		writer.Write(domains[i])
 	}
 }
 
@@ -399,18 +414,10 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 
 			sleeper(l.ctx, l.toWait)
 
-			if DEBUG_MODE {
-				fmt.Printf("%s -> New fetch start with index %d-%d\n", l.Name, l.index, l.index+STEP)
-			}
-
 			entries, err := l.GetRawEntries(int64(l.index), int64(l.index+STEP))
 			if err != nil {
 				l.setError("FATAL: Failed to get raw entries: %s", err)
 				return
-			}
-
-			if DEBUG_MODE {
-				fmt.Printf("%s -> Got %d leaf entry\n", l.Name, len(entries))
 			}
 
 			for i := range entries {
@@ -428,10 +435,6 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 				if err != nil && logE == nil {
 					l.setError("Failed to convert raw log to log at index %d: %s", rawLogE.Index, err)
 					continue
-				}
-
-				if DEBUG_MODE {
-					fmt.Printf("%s -> Leaf entry at %d is parsed successfuly!\n", l.Name, logE.Index)
 				}
 
 				fetchDomain(logE)
