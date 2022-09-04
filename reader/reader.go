@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// isExist opens file in path, iterate over the lines and returns whether the given entry is match with any of the lines.
+// isExist opens file in path, iterate over the lines and returns whether the given entry is match with any of the lines through channel.
 func isExist(ctx context.Context, wg *sync.WaitGroup, isFound chan<- bool, errChan chan<- error, path string, entry []byte) {
 
 	defer wg.Done()
@@ -97,6 +97,8 @@ func IsExistDist(files []*os.File, entry []byte) (bool, error) {
 			}
 
 			scanned += 1
+
+			// Every isExist() goroutine returned false.
 			if scanned == l {
 				goto exit
 			}
