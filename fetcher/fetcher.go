@@ -168,6 +168,7 @@ func (l *log) updateIndex() error {
 	return nil
 }
 
+// Set the context for the log. THis context is same as in every other log.
 func (l *log) setCtx(ctx context.Context) {
 
 	l.m.Lock()
