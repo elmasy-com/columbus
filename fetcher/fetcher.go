@@ -104,7 +104,7 @@ func (l *log) setError(format string, a ...any) {
 	fmt.Fprintf(os.Stderr, "%s\n", l.err.Error())
 }
 
-// Update the size of the log.
+// Update the size of the log from SignedTreeHead.
 func (l *log) setSize() error {
 
 	if l.Client == nil {
@@ -124,7 +124,7 @@ func (l *log) setSize() error {
 	return nil
 }
 
-// Update the index of the log from the .index file.
+// Update the index of the log from the index file.
 func (l *log) updateIndex() error {
 
 	// Do not update log, that updated before
@@ -194,7 +194,7 @@ func (l *log) increaseToWait() {
 	l.toWait += 10
 }
 
-// Get raw entries and handle non fatal errors.
+// Get raw entries from the log server, handle non fatal errors and return the raw entires.
 func (l *log) GetRawEntries(start, end int64) ([]ct.LeafEntry, error) {
 
 	entries, err := l.Client.GetRawEntries(context.TODO(), start, end)
@@ -282,8 +282,8 @@ func saveIndex() error {
 	return nil
 }
 
-// backgroundSave saves the indexes of the URIS every 1 minute.
-// In case of any unexpected termination.
+// backgroundSave saves the indexes of the URIS every <backgroundSaveInterval> seconds.
+// This function is for the case of any unexpected termination.
 // signal context will terminate this, but a last save will happen at the end of Fetch()
 func backgroundSave(ctx context.Context) {
 
@@ -349,11 +349,14 @@ func fetchDomain(e *ct.LogEntry) {
 		}
 	}
 
+	// Write only unique domains
 	for i := range domains {
 		writer.Write(domains[i])
 	}
 }
 
+// fetchLog updates the fileds of l log and start the fetchinf loop.
+// In case of termination (ctx.Done()) this function exits.
 func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 
 	defer wg.Done()
@@ -412,6 +415,7 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 			return
 		default:
 
+			// If context is done, this function return only after every single entries sent to the writer.
 			sleeper(l.ctx, l.toWait)
 
 			entries, err := l.GetRawEntries(int64(l.index), int64(l.index+STEP))
@@ -466,6 +470,8 @@ func fetcher(ctx context.Context) {
 			return
 		default:
 
+			// The fetchLog() goroutines also got the context, if the context is done,
+			// this interation finishes and the new iteration trigers the ctx.Done()
 			for i := range URIS {
 				wg.Add(1)
 				go fetchLog(&wg, ctx, &URIS[i])
@@ -477,6 +483,7 @@ func fetcher(ctx context.Context) {
 			}
 		}
 
+		// Wait <fetcherInterval> seconds before starting a new fetching loop.
 		sleeper(ctx, fetcherInterval)
 	}
 }
