@@ -12,6 +12,7 @@ import (
 
 	"github.com/elmasy-com/columbus/closer"
 	"github.com/elmasy-com/columbus/fetcher"
+	"github.com/elmasy-com/columbus/webserver"
 	"github.com/elmasy-com/columbus/writer"
 )
 
@@ -41,6 +42,9 @@ func main() {
 
 	fetcher.Start()
 	fmt.Printf("fetcher started!\n")
+
+	webserver.Start()
+	fmt.Printf("webserver started!\n")
 
 	sigCtx, sigCancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer sigCancel()

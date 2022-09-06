@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 )
 
 // isExist opens file in path, iterate over the lines and returns whether the given entry is match with any of the lines through channel.
@@ -16,12 +15,14 @@ func isExist(ctx context.Context, wg *sync.WaitGroup, isFound chan<- bool, errCh
 	defer wg.Done()
 
 	var (
-		found   bool
-		err     error
-		file    *os.File
-		line    []byte
-		buff    = make([]byte, 0, 256)
-		scanner *bufio.Scanner
+		found    bool
+		err      error
+		file     *os.File
+		line     []byte
+		lineLen  int
+		entryLen = len(entry)
+		buff     = make([]byte, 0, 256)
+		scanner  *bufio.Scanner
 	)
 
 	file, err = os.OpenFile(path, os.O_RDONLY, 0644)
@@ -42,11 +43,16 @@ func isExist(ctx context.Context, wg *sync.WaitGroup, isFound chan<- bool, errCh
 		default:
 
 			line = scanner.Bytes()
+			lineLen = len(line)
 
 			switch {
 			case line[0] != entry[0]:
 				continue
-			case len(line) != len(entry):
+			case lineLen != entryLen:
+				continue
+			case lineLen > 1 && line[1] != entry[1]:
+				continue
+			case lineLen > 2 && line[2] != entry[2]:
 				continue
 			case bytes.Equal(line, entry):
 				found = true
@@ -62,6 +68,7 @@ exit:
 	errChan <- err
 }
 
+// IsExistDist creates a goroutine for every file in files and
 func IsExistDist(files []*os.File, entry []byte) (bool, error) {
 
 	if files == nil {
@@ -77,7 +84,6 @@ func IsExistDist(files []*os.File, entry []byte) (bool, error) {
 		errChan     = make(chan error, l)
 		ctx, cancel = context.WithCancel(context.Background())
 		wg          sync.WaitGroup
-		s           = time.Now() // TODO: Remove, only for debug/benchmark
 	)
 
 	for i := range files {
@@ -107,10 +113,6 @@ func IsExistDist(files []*os.File, entry []byte) (bool, error) {
 
 exit:
 
-	// TODO: Remove, onlt for debug. Not accurate, just basic
-	if time.Since(s) > 5*time.Second {
-		fmt.Printf("Time to run IsExistDist(): %s\n", time.Since(s))
-	}
 	cancel()
 	wg.Wait()
 	close(isFound)

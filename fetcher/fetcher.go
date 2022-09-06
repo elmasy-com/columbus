@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -16,18 +14,6 @@ import (
 	"github.com/google/certificate-transparency-go/client"
 	"github.com/google/certificate-transparency-go/jsonclient"
 )
-
-type log struct {
-	URI    string            // URI of the log
-	Name   string            // "nickname" of the log
-	Client *client.LogClient // CT LogCLient
-	index  int               // Index to start with, updated from the .index file if present
-	size   int               // The number of entries  stored in the log
-	ctx    context.Context   // TODO: Pointless
-	toWait int
-	err    error // Last error
-	m      *sync.Mutex
-}
 
 var (
 	USER_AGENT = "Elmasy-Columbus/0.1-dev"
@@ -72,162 +58,6 @@ var (
 	m       sync.Mutex
 )
 
-// Set index
-func (l *log) setIndex(i int) {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	l.index = i
-}
-
-// Increase the index by one
-func (l *log) increaseIndex() {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	l.index += 1
-}
-
-// Set the Error field and print is to STDERR.
-// Format the string to "l.Name -> <error>\n"
-func (l *log) setError(format string, a ...any) {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	format = fmt.Sprintf("%s -> %s", l.Name, format)
-
-	l.err = fmt.Errorf(format, a...)
-
-	fmt.Fprintf(os.Stderr, "%s\n", l.err.Error())
-}
-
-// Update the size of the log from SignedTreeHead.
-func (l *log) setSize() error {
-
-	if l.Client == nil {
-		return fmt.Errorf("client is nil")
-	}
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	sth, err := l.Client.GetSTH(context.TODO())
-	if err != nil {
-		return err
-	}
-
-	l.size = int(sth.TreeSize)
-
-	return nil
-}
-
-// Update the index of the log from the index file.
-func (l *log) updateIndex() error {
-
-	// Do not update log, that updated before
-	if l.index > 0 {
-		return nil
-	}
-
-	if _, err := os.Stat(writer.WorkingDir + "/index"); os.IsNotExist(err) {
-		return nil
-	} else if err != nil {
-		return err
-	}
-
-	out, err := os.ReadFile(writer.WorkingDir + "/index")
-	if err != nil {
-		return err
-	}
-
-	lines := strings.Split(string(out), "\n")
-
-	for i := range lines {
-
-		fields := strings.Split(lines[i], "=")
-
-		if len(fields) != 2 {
-			continue
-		}
-
-		if fields[0] != l.Name {
-			continue
-		}
-
-		ind, err := strconv.Atoi(fields[1])
-		if err != nil {
-			return fmt.Errorf("failed to convert index %s to int for %s", fields[1], fields[0])
-		}
-
-		l.setIndex(ind)
-	}
-
-	return nil
-}
-
-// Set the context for the log. THis context is same as in every other log.
-func (l *log) setCtx(ctx context.Context) {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	l.ctx = ctx
-}
-
-// Set toWait to s seconds.
-func (l *log) setToWait(s int) {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	l.toWait = s
-}
-
-// Increase toWait seconds by 10
-func (l *log) increaseToWait() {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	l.toWait += 10
-}
-
-// Get raw entries from the log server, handle non fatal errors and return the raw entires.
-func (l *log) GetRawEntries(start, end int64) ([]ct.LeafEntry, error) {
-
-	entries, err := l.Client.GetRawEntries(context.TODO(), start, end)
-	if err != nil {
-
-		switch {
-		case strings.Contains(err.Error(), "429 Too Many Requests"):
-			l.increaseToWait()
-			l.setError("Failed to get raw entries: %s. Waiting for %d seconds to retry...", err, l.toWait)
-			return nil, nil
-		case strings.Contains(err.Error(), "Client.Timeout exceeded while awaiting headers"):
-			// A temporary error, sleep 10 sec
-			l.setError("Failed to get raw entries: %s. Waiting for 10 seconds to retry...", err)
-			sleeper(l.ctx, 10)
-			return nil, nil
-		case strings.Contains(err.Error(), "Client.Timeout or context cancellation while reading body"):
-			// Context is set to TODO() so, Client.Timeout must be the issue, retry after 10 sec
-			l.setError("Failed to get raw entries: %s. Waiting for 10 seconds to retry...", err)
-			sleeper(l.ctx, 10)
-			return nil, nil
-		default:
-			return nil, err
-		}
-	}
-
-	if entries == nil {
-		return nil, fmt.Errorf("entries is nil")
-	}
-
-	return entries.Entries, nil
-}
-
 func getRunning() bool {
 	m.Lock()
 	defer m.Unlock()
@@ -263,21 +93,15 @@ func saveIndex() error {
 
 	for i := range URIS {
 
-		URIS[i].m.Lock()
-
 		// Skip logs, thats not working/no progress.
-		if URIS[i].index == 0 {
-			URIS[i].m.Unlock()
+		if URIS[i].GetIndex() == 0 {
 			continue
 		}
 
-		_, err = file.WriteString(fmt.Sprintf("%s=%d\n", URIS[i].Name, URIS[i].index))
+		_, err = file.WriteString(fmt.Sprintf("%s=%d\n", URIS[i].GetName(), URIS[i].GetIndex()))
 		if err != nil {
-			URIS[i].m.Unlock()
 			return err
 		}
-
-		URIS[i].m.Unlock()
 	}
 
 	return nil
@@ -367,11 +191,11 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 		l.setError("FATAL: Failed to update index: %s", err)
 		return
 	}
-	if l.index > 0 {
-		fmt.Printf("%s -> Continuing from index %d\n", l.Name, l.index)
+	if l.GetIndex() > 0 {
+		fmt.Printf("%s -> Continuing from index %d\n", l.GetName(), l.GetIndex())
 	}
 
-	l.Client, err = client.New(
+	l.client, err = client.New(
 		l.URI,
 		&http.Client{
 			Timeout: 30 * time.Second,
@@ -400,7 +224,7 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 
 	l.setCtx(ctx)
 
-	fmt.Printf("%s -> Number of logs: %d\n", l.Name, l.size)
+	fmt.Printf("%s -> Number of logs: %d\n", l.GetName(), l.size)
 
 	// Number of seconds to wait.
 	l.setToWait(0)
@@ -408,18 +232,18 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 	// Logs MAY return fewer than the number of leaves requested. Only complete
 	// if we actually got all the leaves we were expecting.
 	// See more: https://github.com/google/certificate-transparency-go/blob/52d94d8cbab94d6698621839ab1a439d17ebbfb2/scanner/fetcher.go#L263
-	for l.index < l.size {
+	for l.GetIndex() < l.size {
 
 		select {
 		case <-ctx.Done():
-			fmt.Printf("%s -> Fetcher closed!\n", l.Name)
+			fmt.Printf("%s -> Fetcher closed!\n", l.GetName())
 			return
 		default:
 
 			// If context is done, this function return only after every single entries sent to the writer.
 			sleeper(l.ctx, l.toWait)
 
-			entries, err := l.GetRawEntries(int64(l.index), int64(l.index+STEP))
+			entries, err := l.GetRawEntries(int64(l.GetIndex()), int64(l.GetIndex()+STEP))
 			if err != nil {
 				l.setError("FATAL: Failed to get raw entries: %s", err)
 				return
@@ -427,9 +251,9 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 
 			for i := range entries {
 
-				rawLogE, err := ct.RawLogEntryFromLeaf(int64(l.index), &entries[i])
+				rawLogE, err := ct.RawLogEntryFromLeaf(int64(l.GetIndex()), &entries[i])
 				if err != nil {
-					l.setError("Failed to parse leaf to raw entry at index %d: %s", l.index, err)
+					l.setError("Failed to parse leaf to raw entry at index %d: %s", l.GetIndex(), err)
 					l.increaseIndex()
 					continue
 				}
@@ -447,7 +271,7 @@ func fetchLog(wg *sync.WaitGroup, ctx context.Context, l *log) {
 		}
 	}
 
-	fmt.Printf("%s -> Finished parsing %d logs!\n", l.Name, l.index)
+	fmt.Printf("%s -> Finished parsing %d logs!\n", l.GetName(), l.GetIndex())
 }
 
 func fetcher(ctx context.Context) {
