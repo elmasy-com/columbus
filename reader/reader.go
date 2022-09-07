@@ -21,7 +21,7 @@ func isExist(ctx context.Context, wg *sync.WaitGroup, isFound chan<- bool, errCh
 		line     []byte
 		lineLen  int
 		entryLen = len(entry)
-		buff     = make([]byte, 0, 256)
+		buff     = make([]byte, 256)
 		scanner  *bufio.Scanner
 	)
 
