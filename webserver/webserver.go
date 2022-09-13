@@ -3,7 +3,6 @@ package webserver
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -45,6 +44,8 @@ func Start() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
+	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 
 	router.GET("/status", getStatus)
@@ -56,7 +57,7 @@ func Start() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			fmt.Fprintf(os.Stderr, "Webserver failed: %s\n", err)
 		}
 	}()
 
