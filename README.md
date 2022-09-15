@@ -18,4 +18,7 @@ WorkingDir/
 
 `index`: Store the saved/last parsed index.
 
-# TODO
+# Benchmark
+
+- Writing is fast
+- Finder: ~27s with 1058372335 lines ditributed across log's list files.
