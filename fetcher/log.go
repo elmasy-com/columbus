@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/elmasy-com/columbus/config"
-	"github.com/elmasy-com/elnet/domain"
+	"github.com/elmasy-com/columbus/writer"
 	"github.com/elmasy-com/slices"
 	"github.com/g0rbe/slitu"
 	ct "github.com/google/certificate-transparency-go"
@@ -28,12 +28,7 @@ type log struct {
 	err            error             // Last error
 	client         *client.LogClient // CT LogCLient
 	fetcherRunning bool              // Indicate that fetcher is running
-	writerRunning  bool              // Indicate that writer is running
-	domains        chan string       // Channel to stream domains to writer
-	dirPath        string
-	listFilePath   string
 	indexFilePath  string
-	listFile       *os.File
 	ctx            context.Context
 	cancel         context.CancelFunc
 	m              sync.Mutex
@@ -97,7 +92,7 @@ func (l *log) GetRunning() bool {
 	l.m.Lock()
 	defer l.m.Unlock()
 
-	return l.fetcherRunning && l.writerRunning
+	return l.fetcherRunning
 }
 
 func (l *log) getFetcherRunning() bool {
@@ -106,14 +101,6 @@ func (l *log) getFetcherRunning() bool {
 	defer l.m.Unlock()
 
 	return l.fetcherRunning
-}
-
-func (l *log) getWriterRunning() bool {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	return l.writerRunning
 }
 
 /*
@@ -160,14 +147,6 @@ func (l *log) setFetcherRunning(v bool) {
 	l.fetcherRunning = v
 }
 
-func (l *log) setWriterRunning(v bool) {
-
-	l.m.Lock()
-	defer l.m.Unlock()
-
-	l.writerRunning = v
-}
-
 /*
  * Others
  */
@@ -192,7 +171,7 @@ func (l *log) updateIndex() error {
 		return nil
 	}
 
-	out, err := os.ReadFile(config.WorkingDir + "/" + l.name + "/index")
+	out, err := os.ReadFile(l.indexFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -256,7 +235,15 @@ func (l *log) backgroundSave() {
 			fmt.Printf("%s -> Background saver closed!\n", l.name)
 			return
 		default:
+
+			// Log parsed, wait until the new fetch iteration
+			if l.GetIndex() >= l.GetSize() {
+				slitu.Sleep(l.ctx, time.Duration(config.FetcherInterval)*time.Second)
+				continue
+			}
+
 			slitu.Sleep(l.ctx, time.Duration(config.BackgroundSaveInterval)*time.Second)
+
 			if err = l.saveIndex(); err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to save indexes: %s\n", err)
 			}
@@ -316,27 +303,8 @@ func (l *log) fetchDomains(e *ct.LogEntry) {
 
 	// Write only unique and valid domains
 	for i := range domains {
-		if domain.IsValid(domains[i]) {
-			l.domains <- domains[i]
-		}
+		writer.Write(domains[i])
 	}
-}
-
-// writer is background func to write the domains to the list file.
-// The writer is stopped by closing the l.domain channel.
-// Writer is stopped after fetcher is stopped to make sure to do not skip any entry.
-func (l *log) writer() {
-
-	l.setWriterRunning(true)
-	defer l.setWriterRunning(false)
-
-	for d := range l.domains {
-
-		l.listFile.WriteString(d + "\n")
-	}
-
-	fmt.Printf("%s -> Writer closed!\n", l.GetName())
-
 }
 
 func (l *log) fetch() {
@@ -437,33 +405,7 @@ func (l *log) fetch() {
 
 			// Do not make unique and restart writer if nothing happend
 			if toBeParsed != 0 {
-
 				fmt.Printf("%s -> Finished parsing %d logs!\n", l.GetName(), toBeParsed)
-
-				// Stop writer and close the listFile before changing the list file.
-				close(l.domains)
-				for l.getWriterRunning() {
-					time.Sleep(1 * time.Second)
-				}
-
-				l.listFile.Close()
-
-				err := unique(l.ctx, l.listFilePath)
-				if err != nil {
-					l.setError("Failed to unique: %s", err)
-					return
-				}
-
-				// Reopen listFIle and restart writer
-				l.listFile, err = os.OpenFile(l.listFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-				if err != nil {
-					l.setError("Failed to open list: %s", err)
-					return
-				}
-
-				l.domains = make(chan string, 128)
-
-				go l.writer()
 			}
 
 			slitu.Sleep(l.ctx, time.Duration(config.FetcherInterval)*time.Second)
@@ -478,7 +420,7 @@ func (l *log) fetch() {
 }
 
 // Close the log.
-// THis function blocks until everything is closed.
+// This function blocks until everything is closed.
 func (l *log) Close() {
 
 	// Stop fetcher only if running
@@ -490,18 +432,6 @@ func (l *log) Close() {
 			time.Sleep(200 * time.Millisecond)
 		}
 	}
-
-	// Stop writer only if running
-	if l.getWriterRunning() {
-
-		close(l.domains)
-
-		for l.getWriterRunning() {
-			time.Sleep(100 * time.Millisecond)
-		}
-	}
-
-	l.listFile.Close()
 }
 
 // Fils the fields of log l and start background saver, writer and fetcher.
@@ -530,6 +460,8 @@ func (l *log) Start() {
 		return
 	}
 
+	l.indexFilePath = fmt.Sprintf("%s/%s.index", config.WorkingDir, l.name)
+
 	err = l.updateIndex()
 	if err != nil {
 		l.setError("Failed to update index: %s", err)
@@ -550,30 +482,6 @@ func (l *log) Start() {
 
 	l.ctx, l.cancel = context.WithCancel(context.Background())
 
-	l.dirPath = fmt.Sprintf("%s/%s", config.WorkingDir, l.name)
-	l.listFilePath = fmt.Sprintf("%s/list", l.dirPath)
-	l.indexFilePath = fmt.Sprintf("%s/index", l.dirPath)
-
-	// create directory if not exist
-	if stat, err := os.Stat(l.dirPath); os.IsNotExist(err) {
-		if errDir := os.Mkdir(l.dirPath, 0755); errDir != nil {
-			l.setError("Failed to create directory: %s", errDir)
-			return
-		}
-	} else if !stat.IsDir() {
-		l.setError("Failed to create directory: %s is exist, but not a directory", stat.Name())
-		return
-	}
-
-	l.listFile, err = os.OpenFile(l.listFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		l.setError("Failed to open list: %s", err)
-		return
-	}
-
-	l.domains = make(chan string, 128)
-
 	go l.backgroundSave()
-	go l.writer()
 	go l.fetch()
 }

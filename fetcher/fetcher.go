@@ -41,7 +41,7 @@ func Start() {
 	}
 }
 
-// Close every log.
+// Close every log. The closing function of logs blosk until it is closed.
 func Close() {
 
 	for i := range Logs {
