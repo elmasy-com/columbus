@@ -2,7 +2,9 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/elmasy-com/slices"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -86,6 +89,58 @@ func DomainsInsert(d string) (bool, error) {
 	}
 
 	return res.UpsertedCount != 0, nil
+}
+
+// DomainsInsertWithRecord inserts the given domain d to the *domains* database IF d has at least one valid record.
+// Checks if d is valid, do a Clean() and search for records. If found at least one valid record, insert into the database.
+// This function always updates the "updated" field, regardless of the records.
+//
+// This function returns if domain d is updated recently.
+// This function ignores common DNS errors (eg.: NXDOMAIN).
+//
+// If domain is invalid, returns fault.ErrInvalidDomain.
+// If failed to get parts of d (eg.: d is a TLD), returns ault.ErrGetPartsFailed.
+func DomainsInsertWithRecord(d string) error {
+
+	d = dns.Clean(d)
+
+	// DomainsUpdatedRecently check if d is valid.
+	updated, err := DomainsUpdatedRecently(d)
+	if err != nil {
+		return err
+	}
+
+	if updated {
+		return nil
+	}
+
+	records, err := dns.QueryAll(d)
+	if err != nil && !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
+		!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
+
+		// Ignore common errors
+
+		return fmt.Errorf("failed to update: %w", err)
+	}
+
+	if len(records) == 0 {
+		return DomainsUpdateUpdatedTime(d)
+	}
+
+	_, err = DomainsInsert(d)
+	if err != nil {
+		return fmt.Errorf("failed to insert domain: %s", err)
+	}
+
+	for i := range records {
+
+		_, err = RecordsInsert(d, records[i].Type, records[i].Value)
+		if err != nil {
+			return fmt.Errorf("failed to insert record: %w", err)
+		}
+	}
+
+	return nil
 }
 
 // DomainsLookup validate, Clean() and query the DB and returns a list subdomains only (eg.: "wwww", "mail").
@@ -389,6 +444,8 @@ func DomainsUpdateUpdatedTime(d string) error {
 
 // DomainsUpdatedRecently check whether domain d is updated recently (in the previous hour).
 //
+// Return false, nil id d is not exists in the database (ignore mongo.ErrNoDocuments).
+//
 // If d is invalid return fault.ErrInvalidDomain.
 // If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
 func DomainsUpdatedRecently(d string) (bool, error) {
@@ -409,6 +466,9 @@ func DomainsUpdatedRecently(d string) (bool, error) {
 	dom := new(Domain)
 
 	err := Domains.FindOne(context.TODO(), filter).Decode(dom)
+	if err != nil && errors.Is(err, mongo.ErrNoDocuments) {
+		return false, nil
+	}
 
 	return dom.Updated > time.Now().Unix()-3600, err
 }

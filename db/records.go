@@ -44,166 +44,55 @@ func increaseTotalUpdated() {
 
 }
 
-// Update type t records for d.
-// Check if domain d is a wildcard t type record.
-// This function updates the DB.
-func recordsUpdateRecord(d string, t uint16) error {
+// RecordsInsert insert (if not exist) or updates the "date" field for record with "type" t and "value" v.
+// This function updates the "updated" field to the current time with DomainsUpdateUpdatedTime().
+// If the same record found, updates the "time" field in element.
+// If new record found, append it to the "records" field.
+//
+// Returns whether record with type t and value is a new record.
+//
+// If domain d is invalid, returns fault.ErrInvalidDomain.
+// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
+func RecordsInsert(d string, t uint16, v string) (bool, error) {
 
 	if !validator.Domain(d) {
-		return fault.ErrInvalidDomain
+		return false, fault.ErrInvalidDomain
 	}
 
-	d = dns.Clean(d)
-
-	p := dns.GetParts(d)
+	p := dns.GetParts(dns.Clean(d))
 	if p == nil || p.Domain == "" || p.TLD == "" {
-		return fault.ErrGetPartsFailed
+		return false, fault.ErrGetPartsFailed
 	}
 
-	var (
-		r   []string
-		err error
-	)
+	// "records" field should contain only one element with "type" t and "value" v.
+	// Try to update first!
+	// If MatchedCount is 0, the record with "type" t and "value" r[i] is new and the new record will be appended to the array.
+	// If MatchedCount is 1, only one record is exist with "type" t and "value" v and the time for the element is updated.
+	// If MatchedCount is > 1, duplicate record found, ERROR!
+	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}, {Key: "records.type", Value: t}, {Key: "records.value", Value: v}}
 
-	// CHeck if domain has a t type wildcard record.
-	wc, err := dns.IsWildcard(d, t)
+	up := bson.D{{Key: "$set", Value: bson.D{{Key: "records.$.time", Value: time.Now().Unix()}}}}
+
+	result, err := Domains.UpdateOne(context.TODO(), filter, up)
 	if err != nil {
-		return err
-	}
-	if wc {
-		return nil
+		return false, err
 	}
 
-	switch t {
-
-	case dns.TypeA:
-		// A
-		ips, err := dns.TryQueryA(d)
-		if err != nil {
-			return err
-		}
-
-		for i := range ips {
-			r = append(r, ips[i].String())
-		}
-
-	case dns.TypeAAAA:
-		// AAAA
-		ips, err := dns.TryQueryAAAA(d)
-		if err != nil {
-			return err
-		}
-
-		for i := range ips {
-			r = append(r, ips[i].String())
-		}
-
-	case dns.TypeCAA:
-		// CAA
-		caas, err := dns.TryQueryCAA(d)
-		if err != nil {
-			return err
-		}
-
-		for i := range caas {
-			r = append(r, caas[i].String())
-		}
-
-	case dns.TypeCNAME:
-		// CNAME
-		r, err = dns.TryQueryCNAME(d)
-
-	case dns.TypeDNAME:
-		//DNAME
-		v, err := dns.TryQueryDNAME(d)
-		if err != nil {
-			return err
-		}
-
-		r = append(r, v)
-
-	case dns.TypeMX:
-		// MX
-		mxs, err := dns.TryQueryMX(d)
-		if err != nil {
-			return err
-		}
-
-		for i := range mxs {
-			r = append(r, mxs[i].String())
-		}
-
-	case dns.TypeNS:
-		// NS
-		r, err = dns.TryQueryNS(d)
-
-	case dns.TypeSOA:
-		// SOA
-		v, err := dns.TryQuerySOA(d)
-		if err != nil {
-			return err
-		}
-
-		if v != nil {
-			r = append(r, v.String())
-		}
-
-	case dns.TypeSRV:
-		// SRV
-		srvs, err := dns.TryQuerySRV(d)
-		if err != nil {
-			return err
-		}
-
-		for i := range srvs {
-			r = append(r, srvs[i].String())
-		}
-	case dns.TypeTXT:
-		// TXT
-		r, err = dns.TryQueryTXT(d)
-
-	default:
-		return fmt.Errorf("invalid type: %d", t)
+	if result.MatchedCount == 1 {
+		return false, DomainsUpdateUpdatedTime(d)
 	}
 
+	// Append new record to "records"
+	filter = bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
+
+	up = bson.D{{Key: "$addToSet", Value: bson.D{{Key: "records", Value: Record{Type: t, Value: v, Time: time.Now().Unix()}}}}}
+
+	result, err = Domains.UpdateOne(context.TODO(), filter, up)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	for i := range r {
-
-		// "records" field should contain only one element with "type" t and "value" v.
-		// Try to update first!
-		// If MatchedCount is 0, the record with "type" t and "value" r[i] is new and the new record will be appended to the array.
-		// If MatchedCount is 1, only one record is exist with "type" t and "value" v and the time for the element is updated.
-		// If MatchedCount is > 1, duplicate record found, ERROR!
-		filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}, {Key: "records.type", Value: t}, {Key: "records.value", Value: r[i]}}
-
-		up := bson.D{{Key: "$set", Value: bson.D{{Key: "records.$.time", Value: time.Now().Unix()}}}}
-
-		result, err := Domains.UpdateOne(context.TODO(), filter, up)
-		if err != nil {
-			return err
-		}
-		if result.MatchedCount > 1 {
-			return fmt.Errorf("duplicate record found: %s", r[i])
-		}
-		if result.MatchedCount == 1 {
-			continue
-		}
-
-		// Append new record to "records"
-		filter = bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
-
-		up = bson.D{{Key: "$addToSet", Value: bson.D{{Key: "records", Value: Record{Type: t, Value: r[i], Time: time.Now().Unix()}}}}}
-
-		_, err = Domains.UpdateOne(context.TODO(), filter, up)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return result.ModifiedCount == 1, DomainsUpdateUpdatedTime(d)
 }
 
 // RecordsUpdate updates the records field for domain d if d is not update recently (in the previous hour).
@@ -213,12 +102,14 @@ func recordsUpdateRecord(d string, t uint16) error {
 //
 // Checks if d is a wildcard record before update.
 //
-// If ignoreError is true, common DNS errors are ignored.
+// This function ignores the common DNS errors.
 // If ignoreUpdated is true, ignore when was the last update based on the "updated" timestamp.
 //
 // If domain d is invalid, returns fault.ErrInvalidDomain.
 // If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
-func RecordsUpdate(d string, ignoreError bool, ignoreUpdated bool) error {
+func RecordsUpdate(d string, ignoreUpdated bool) error {
+
+	d = dns.Clean(d)
 
 	if !ignoreUpdated {
 
@@ -232,147 +123,23 @@ func RecordsUpdate(d string, ignoreError bool, ignoreUpdated bool) error {
 		}
 	}
 
-	err := DomainsUpdateUpdatedTime(d)
-	if err != nil {
-		return fmt.Errorf("failed to update %s updated time: %w", d, err)
+	records, err := dns.QueryAll(d)
+	if err != nil && !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
+		!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
+
+		// Ignore common errors
+
+		return fmt.Errorf("failed to update: %w", err)
 	}
 
-	err = recordsUpdateRecord(d, dns.TypeA)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update A: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update A: %w", err)
-		}
+	if len(records) == 0 {
+		return DomainsUpdateUpdatedTime(d)
 	}
 
-	err = recordsUpdateRecord(d, dns.TypeAAAA)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update AAAA: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update AAAA: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeCAA)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update CAA: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update CAA: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeCNAME)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update CNAME: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update CNAME: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeDNAME)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update DNAME: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update DNAME: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeMX)
-	if err != nil {
-		if !ignoreError {
-			return fmt.Errorf("failed to update MX: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update MX: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeNS)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update NS: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update NS: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeSOA)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update SOA: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update SOA: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeSRV)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update SRV: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update SRV: %w", err)
-		}
-	}
-
-	err = recordsUpdateRecord(d, dns.TypeTXT)
-	if err != nil {
-
-		if !ignoreError {
-			return fmt.Errorf("failed to update TXT: %w", err)
-		}
-
-		if !errors.Is(err, dns.ErrName) && !errors.Is(err, dns.ErrServerFailure) &&
-			!os.IsTimeout(err) && !errors.Is(err, dns.ErrRefused) {
-
-			return fmt.Errorf("failed to update TXT: %w", err)
+	for i := range records {
+		_, err := RecordsInsert(d, records[i].Type, records[i].Value)
+		if err != nil {
+			return fmt.Errorf("failed to insert record: %w", err)
 		}
 	}
 
@@ -402,7 +169,7 @@ func recordsUpdaterRoutine(wg *sync.WaitGroup) {
 			increaseTotalUpdated()
 
 			// d is a FQDN
-			err := RecordsUpdate(d, true, false)
+			err := RecordsUpdate(d, false)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to update DNS records for %s: %s\n", d, err)
 			}
@@ -420,7 +187,7 @@ func recordsUpdaterRoutine(wg *sync.WaitGroup) {
 
 				increaseTotalUpdated()
 
-				err := RecordsUpdate(ds[i], true, false)
+				err := RecordsUpdate(ds[i], false)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Failed to update DNS records for %s: %s\n", ds[i], err)
 				}
