@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/elmasy-com/columbus/server/config"
+	"github.com/elmasy-com/columbus/server/server/history"
 	"github.com/elmasy-com/columbus/server/server/lookup"
 	"github.com/elmasy-com/columbus/server/server/search"
 	"github.com/elmasy-com/columbus/server/server/stat"
@@ -58,7 +59,7 @@ func Run() error {
 	router.GET("/api/lookup/:domain", lookup.GetApiLookup)
 	router.GET("/api/starts/:domain", lookup.GetApiStarts)
 	router.GET("/api/tld/:domain", lookup.GetApiTLD)
-	router.GET("/api/history/:domain", lookup.GetApiHistory)
+	router.GET("/api/history/:domain", history.GetApiHistory)
 
 	// router.PUT("/insert/:domain", InsertPut)
 
