@@ -17,11 +17,11 @@ import (
 )
 
 var (
-	Version    string
-	Commit     string
-	configPath = flag.String("config", "", "Path to the config file")
-	version    = flag.Bool("version", false, "Print current version")
-	Cancel     context.CancelFunc
+	BuildDate   string
+	BuildCommit string
+	configPath  = flag.String("config", "", "Path to the config file")
+	version     = flag.Bool("version", false, "Print current version")
+	Cancel      context.CancelFunc
 )
 
 func main() {
@@ -29,8 +29,8 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Printf("Version: %s\n", Version)
-		fmt.Printf("Git Commit: %s\n", Commit)
+		fmt.Printf("Build date: %s\n", BuildDate)
+		fmt.Printf("Git Commit: %s\n", BuildCommit)
 		os.Exit(0)
 	}
 
