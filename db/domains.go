@@ -360,3 +360,55 @@ func DomainsRecords(d string, days int) ([]Record, error) {
 
 	return records, nil
 }
+
+// DomainsUpdateUpdatedTime updated the "updated" timestamp to the current time to domain d.
+//
+// If d is invalid return fault.ErrInvalidDomain.
+// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
+func DomainsUpdateUpdatedTime(d string) error {
+
+	if !validator.Domain(d) {
+		return fault.ErrInvalidDomain
+	}
+
+	d = dns.Clean(d)
+
+	p := dns.GetParts(d)
+	if p == nil || p.Domain == "" || p.TLD == "" {
+		return fault.ErrGetPartsFailed
+	}
+
+	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
+
+	up := bson.D{{Key: "$set", Value: bson.D{{Key: "updated", Value: time.Now().Unix()}}}}
+
+	_, err := Domains.UpdateOne(context.TODO(), filter, up)
+
+	return err
+}
+
+// DomainsUpdatedRecently check whether domain d is updated recently (in the previous hour).
+//
+// If d is invalid return fault.ErrInvalidDomain.
+// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
+func DomainsUpdatedRecently(d string) (bool, error) {
+
+	if !validator.Domain(d) {
+		return false, fault.ErrInvalidDomain
+	}
+
+	d = dns.Clean(d)
+
+	p := dns.GetParts(d)
+	if p == nil || p.Domain == "" || p.TLD == "" {
+		return false, fault.ErrGetPartsFailed
+	}
+
+	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
+
+	dom := new(Domain)
+
+	err := Domains.FindOne(context.TODO(), filter).Decode(dom)
+
+	return dom.Updated > time.Now().Unix()-3600, err
+}

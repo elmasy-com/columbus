@@ -44,58 +44,6 @@ func increaseTotalUpdated() {
 
 }
 
-// RecordsUpdateUpdatedTime updated the "updated" timestamp to the current time.
-//
-// If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
-func RecordsUpdateUpdatedTime(d string) error {
-
-	if !validator.Domain(d) {
-		return fault.ErrInvalidDomain
-	}
-
-	d = dns.Clean(d)
-
-	p := dns.GetParts(d)
-	if p == nil || p.Domain == "" || p.TLD == "" {
-		return fault.ErrGetPartsFailed
-	}
-
-	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
-
-	up := bson.D{{Key: "$set", Value: bson.D{{Key: "updated", Value: time.Now().Unix()}}}}
-
-	_, err := Domains.UpdateOne(context.TODO(), filter, up)
-
-	return err
-}
-
-// RecordsUpdatedRecently check whether domain d is updated recently (in the previous hour).
-//
-// If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
-func RecordsUpdatedRecently(d string) (bool, error) {
-
-	if !validator.Domain(d) {
-		return false, fault.ErrInvalidDomain
-	}
-
-	d = dns.Clean(d)
-
-	p := dns.GetParts(d)
-	if p == nil || p.Domain == "" || p.TLD == "" {
-		return false, fault.ErrGetPartsFailed
-	}
-
-	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
-
-	dom := new(Domain)
-
-	err := Domains.FindOne(context.TODO(), filter).Decode(dom)
-
-	return dom.Updated > time.Now().Unix()-3600, err
-}
-
 // Update type t records for d.
 // Check if domain d is a wildcard t type record.
 // This function updates the DB.
@@ -274,7 +222,7 @@ func RecordsUpdate(d string, ignoreError bool, ignoreUpdated bool) error {
 
 	if !ignoreUpdated {
 
-		updated, err := RecordsUpdatedRecently(d)
+		updated, err := DomainsUpdatedRecently(d)
 		if err != nil {
 			return fmt.Errorf("failed to check if %s is updated recently: %w", d, err)
 		}
@@ -284,7 +232,7 @@ func RecordsUpdate(d string, ignoreError bool, ignoreUpdated bool) error {
 		}
 	}
 
-	err := RecordsUpdateUpdatedTime(d)
+	err := DomainsUpdateUpdatedTime(d)
 	if err != nil {
 		return fmt.Errorf("failed to update %s updated time: %w", d, err)
 	}
