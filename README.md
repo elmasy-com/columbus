@@ -2,8 +2,8 @@
 
 Columbus Project is an API first subdomain discovery service, blazingly fast subdomain enumeration service with advanced features. 
 
-![Subdomain Lookup](https://columbus.elmasy.com/lookup.gif)
-*Columbus returned 638 subdomains of tesla.com in 0.231 sec.*
+![Subdomain Lookup](https://columbus.elmasy.com/count_teslacom.gif)
+*Columbus returned 763 subdomains of tesla.com in less than a second.*
 
 ## Usage
 
@@ -246,3 +246,11 @@ If you want to Columbus DNS start automatically:
 ```
 systemctl enable columbus-dns
 ```
+
+## Frontend
+
+Static site using [Hugo](https://gohugo.io/) and [Introduction theme](https://github.com/victoriadrake/hugo-theme-introduction).
+
+## VHS
+
+Create gifs with [VHS](https://github.com/charmbracelet/vhs).
