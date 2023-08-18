@@ -84,15 +84,11 @@ func insertWorker(wg *sync.WaitGroup) {
 
 		switch {
 		case len(r.Question) < 1:
-			fmt.Fprintf(os.Stderr, "Error: question section is empty\n")
 			continue
 		case len(r.Answer) < 1:
-			fmt.Fprintf(os.Stderr, "Error: message answer is empty\n")
 			continue
 		case len(r.Question) > 1:
-			fmt.Fprintf(os.Stderr, "Error: multiple question\n")
 			continue
-
 		case !isValidResponse(r.Answer[0]):
 			// Further check requires, see: https://community.cloudflare.com/t/noerror-response-for-not-exist-domain-breaks-nslookup/173897
 			continue
@@ -143,7 +139,7 @@ func handleFunc(w dns.ResponseWriter, q *dns.Msg) {
 	// Refuse ANY questions
 	if isQuestionAny(q) {
 		q.MsgHdr.Response = true
-		q.MsgHdr.Rcode = dns.RcodeRefused
+		q.MsgHdr.Rcode = dns.RcodeNotImplemented
 		w.WriteMsg(q)
 		return
 	}
@@ -159,7 +155,7 @@ func handleFunc(w dns.ResponseWriter, q *dns.Msg) {
 	if r == nil {
 		fmt.Fprintf(os.Stderr, "Error: reply is nil\n")
 		q.MsgHdr.Response = true
-		q.MsgHdr.Rcode = 2
+		q.MsgHdr.Rcode = dns.RcodeServerFailure
 		w.WriteMsg(q)
 		return
 	}
