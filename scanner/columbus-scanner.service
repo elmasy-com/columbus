@@ -1,0 +1,18 @@
+[Unit]
+Description=Columbus Scanner
+After=network-online.target
+StartLimitIntervalSec=86400
+StartLimitBurst=47
+
+[Service]
+Type=simple
+User=columbus-scanner
+Group=columbus
+Restart=always
+RestartSec=1800
+
+
+ExecStart=/path/to/columbus-scanner -config /path/to/scanner.conf
+
+[Install]
+WantedBy=multi-user.target

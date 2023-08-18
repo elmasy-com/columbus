@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/elmasy-com/elnet v0.0.0-20230817234858-4b6eba90d152
 	github.com/elmasy-com/slices v0.0.0-20230712174526-6eb4e5e38b73
+	github.com/g0rbe/slitu v1.0.5
 	github.com/gin-gonic/gin v1.9.1
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/text v0.12.0
@@ -15,15 +16,15 @@ require (
 	github.com/bytedance/sonic v1.10.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
-	github.com/g0rbe/slitu v1.0.5 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.15.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/certificate-transparency-go v1.1.6 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
@@ -48,4 +49,5 @@ require (
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/tools v0.12.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
+	k8s.io/klog/v2 v2.100.1 // indirect
 )
