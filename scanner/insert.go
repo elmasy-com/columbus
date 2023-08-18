@@ -31,7 +31,7 @@ func InsertWorker(doms <-chan string, wg *sync.WaitGroup) {
 			Cancel()
 		}
 
-		if err := db.RecordsUpdate(dom, true, false); err != nil {
+		if err := db.RecordsUpdate(dom, false); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to update records for %s: %s\n", dom, err)
 		}
 	}
