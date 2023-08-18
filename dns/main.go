@@ -116,7 +116,7 @@ func insertWorker(wg *sync.WaitGroup) {
 			fmt.Printf("New domain inserted: %s\n", r.Question[0].Name)
 		}
 
-		err = db.RecordsUpdate(r.Question[0].Name, true, false)
+		err = db.RecordsUpdate(r.Question[0].Name, false)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to update records for %s: %s\n", r.Question[0].Name, err)
 		}
