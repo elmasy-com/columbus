@@ -1,0 +1,94 @@
+img {
+    border-radius: 0px !important;
+    border: none;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.4) !important;
+}
+
+.markdown p,
+.markdown pre,
+.markdown ul {
+    text-align: left
+}
+
+h1,
+p,
+hr,
+.navbar-item,
+h1,
+h2,
+.title,
+.subtitle,
+.markdown strong,
+a:hover,
+.footer-text a {
+    color: #DADADB !important;
+}
+
+hr {
+    background-color: #DADADB;
+}
+
+a,
+code {
+    color: #1DDDDD;
+}
+
+html,
+body {
+    background-color: #1d1e20;
+}
+
+.markdown p>code,
+.markdown p>a>code {
+    background-color: transparent !important;
+}
+
+.markdown a {
+    text-decoration: underline;
+}
+
+@media not all and (min-width: 1024px) {
+
+    .hidden-gif {
+
+        display: none !important;
+
+    }
+}
+
+@media (min-width: 1024px) {
+
+    .hidden-gif {
+        margin-bottom: 0px !important;
+    }
+
+    .p-center {
+        text-align: center !important;
+        margin-top: 0px !important;
+    }
+}
+
+.markdown table {
+    border: none;
+}
+
+.markdown th,
+.markdown td {
+    background-color: #1d1e20 !important;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: 1px solid #DADADB !important;
+}
+
+.markdown th {
+    color: #1DDDDD;
+}
+
+.markdown td {
+    color: #DADADB;
+}
+
+.markdown tbody {
+    background-color: #1d1e20;
+}

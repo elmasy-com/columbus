@@ -1,0 +1,561 @@
+openapi: 3.0.3
+info:
+  title: Columbus API
+  description: |
+    A fast, API-first subdomain discovery service with advanced queries.
+    
+    The `Access-Control-Allow-Origin` header on the API endpoints is always set to `*` to allow integration into other sites.
+  contact:
+    email: columbus@elmasy.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.15.1
+servers:
+  - url: https://columbus.elmasy.com
+tags:
+  - name: domain
+    description: Lookup domain.
+  - name: info
+    description: Server informations.
+  - name: tools
+    description: Helper APIs.
+
+paths:
+  /api/lookup/{domain}:
+    get:
+      tags:
+        - domain
+      summary: Lookup subdomains for domain.
+      description: |
+      
+        Returns an array of subdomains.
+
+        The response contains the subdomains only, the domain not included (eg.: `["one", "two", ...]`).
+        
+        If a FQDN is requested than the domain name will be taken out and used in the lookup (eg.: `/api/lookup/columbus.elmasy.com` will be the same as `/api/lookup/elmasy.com`)
+        
+        If `Accept` header is set to `text/plain`, this endpoint returns a newline delimetered text of the list (eg.: `one\ntwo\nthree`).
+        
+        # Note
+        - The subdomain part will be trimmed (eg.: `/api/lookup/totally.invalid.elmasy.com` will be the same as `/api/lookup/elmasy.com`).
+        - If `domain` not found, the server saves for later process.
+        - Only the subdomains are sent in the response to save CPU and RAM on the server side and save bandwith on both client- and server-side.
+      parameters:
+        - name: domain
+          in: path
+          description: Domain to get the subdomains.
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          description:  | 
+            - If `days` greater than 0, returns subdomains that has a valid DNS record in the last `days` days.
+            - If `days` is 0, returns subdomains that has a valid DNS record regardless of the age.
+            - If `days` is -1, returns every known subdomains.
+
+            If omitted, returns every subdomain including historical and invalid ones (aka the default `days` is -1). 
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringArray'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '400':
+          description: Invalid domain or days
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '404':
+          description: Domain not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+  /api/starts/{domain}:
+    get:
+      tags:
+        - domain
+      summary: Find domains that start with the given string.
+      description: |
+      
+        Return an array of Second Level Domains thats start with `domain`.
+        
+        The `domain` parameter must be a Second Level Domain (eg.: `example`) 
+        
+        Example: `/api/starts/reddit` returns `["reddit", "redditmedia", "redditstatistic", ...]`.
+        
+        If `Accept` header is set to `text/plain`, this endpoint returns a newline delimetered text of the list.
+        
+        # Note
+        - The `domain`'s length mist be greater than 4 character.
+        - Only the SLDs are sent in the response to save CPU and RAM on the server side and save bandwith on both client- and server-side.
+
+      parameters:
+        - name: domain
+          in: path
+          description: Domain to get the TLDs.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringArray'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '400':
+          description: Invalid domain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '404':
+          description: Domain not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+  
+  /api/tld/{domain}:
+    get:
+      tags:
+        - domain
+      summary: Find TLDs for the given domain.
+      description: |
+      
+        Returns a list of all known Top Level Domains for the given domain.
+        
+        The domain parameter must be a Second Level Domain (eg.: example).
+        
+        Example: `/api/tld/example` returns `["com", "org", "net"]`.
+        
+        If `Accept` header is set to `text/plain`, this endpoint returns a newline delimetered text of the list (eg.: `com\norg\nnet`).
+        
+      parameters:
+        - name: domain
+          in: path
+          description: Domain to get the TLDs.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringArray'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '400':
+          description: Invalid domain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '404':
+          description: Domain not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+  /api/history/{domain}:
+    get:
+      tags:
+        - domain
+      summary: History of the given domain.
+      description: |
+    
+        Returns the DNS history of the given FQDN.
+        
+        The `type` codes can be found here: [https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml)
+        
+        # Note
+        - **EXPERIMENTAL FEATURE**
+      parameters:
+        - name: domain
+          in: path
+          description: Fully Qualified Domain Name to get the subdomains.
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          description:  | 
+            - If `days` greater than 0, returns records seen in the last `days` days.
+            - If `days` is 0 or -1, returns subdomains every records regardless of the age.
+
+            If omitted, returns every records (aka the default `days` is -1).
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Records'
+        '400':
+          description: Invalid domain or days
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No records found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+
+  /api/stat:
+    get:
+      tags:
+        - info
+      summary: Basic domain statistic
+      description: |
+        Basic domain statistic that holds the total number of domains and
+        the total number of valid domains.
+        
+        Fields:
+        - The `date` field is the last update date in Unix time format.
+        - The `total` field is the number of total entries in the database.
+        - The `updated` field is the number of total entries updated (including entries that updated, but no valid DNS record found).
+        - The `valid` field is the number of total domains that has at least one known DNS record.
+        - The `ctlogs` field is an array that holds the stats of the crawled Certificate Transparency Logs.
+          - The `name` is the name of the log.
+          - The `index` is the current index of the crawler.
+          - The `size` is the total number of entries in the log.
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stat'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /api/tools/tld/{fqdn}:
+    get:
+      tags:
+        - tools
+      summary: Get the TLD from a FQDN.
+      description: |
+        Get the TLD part (eg.: `com`) from a FQDN (eg.: `columbus.elmasy.com`).
+        
+        **IMPORTANT**: Only ICANN managed TLDs are returned, the private ones are only returned in the Top Level Domain.
+        (eg.: `columbus.elmasy.co.uk` -> `co.uk` or `columbus.elmasy.local` -> `local`)
+        
+        If `Accept` header is `text/plain`, returns the result as a string.
+      parameters:
+        - name: fqdn
+          in: path
+          description: FQDN to get the TLD.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '400':
+          description: Bad Request. See the error message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '404':
+          description: Domain not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+                
+  /api/tools/domain/{fqdn}:
+    get:
+      tags:
+        - tools
+      summary: Get the domain from a FQDN.
+      description: |
+        Get the domain part (eg.: `elmasy.com`) from a FQDN (eg.: `columbus.elmasy.com`).
+        
+        If `Accept` header is `text/plain`, returns the result as a string.
+      parameters:
+        - name: fqdn
+          in: path
+          description: FQDN to get the domain.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '400':
+          description: Bad Request. See the error message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '404':
+          description: Domain not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+  
+  /api/tools/subdomain/{fqdn}:
+    get:
+      tags:
+        - tools
+      summary: Get the subdomain from a FQDN.
+      description: |
+        Get the subdomain part (eg.: `columbus`) from a FQDN (eg.: `columbus.elmasy.com`).
+        
+        If `Accept` header is `text/plain`, returns the result as a string.
+      parameters:
+        - name: fqdn
+          in: path
+          description: FQDN to get the subdomain.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '400':
+          description: Bad Request. See the error message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '404':
+          description: Subdomain not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+  
+  /api/tools/isvalid/{fqdn}:
+    get:
+      tags:
+        - tools
+      summary: Returns whether FQDN is a valid domain.
+      description: |
+        Returns whether FQDN is a valid domain.
+      parameters:
+        - name: fqdn
+          in: path
+          description: FQDN to check.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultBool'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+        
+components:
+
+  schemas:
+    StringArray:
+      type: array
+      items:
+        type: string
+    String:
+      type: string
+    Result:
+      type: object
+      properties:
+        result:
+          type: string
+    ResultBool:
+      type: object
+      properties:
+        result:
+          type: boolean
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+    Stat:
+      type: object
+      properties:
+        date:
+          type: integer
+        total:
+          type: integer
+        updated:
+          type: integer
+        valid:
+          type: integer
+        ctlogs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              index:
+                type: integer
+              size:
+                type: integer
+    Records:
+        type: array
+        items:
+            type: object
+            properties:
+              type:
+                type: integer
+              value:
+                type: string
+              time:
+                type: integer
