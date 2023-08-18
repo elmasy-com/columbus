@@ -155,58 +155,18 @@ func DomainsInsertWithRecord(d string) error {
 // If days if < -1, returns fault.ErrInvalidDays.
 func DomainsLookup(d string, days int) ([]string, error) {
 
-	if !dns.IsValid(d) {
-		return nil, fault.ErrInvalidDomain
-	}
-
-	d = dns.Clean(d)
-
-	p := dns.GetParts(d)
-	if p == nil || p.Domain == "" || p.TLD == "" {
-		return nil, fault.ErrGetPartsFailed
-	}
-
-	var filter primitive.D
-
-	if days == 0 {
-		// "records" field is exists
-		filter = bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "records", Value: bson.D{{Key: "$exists", Value: true}}}}
-	} else if days == -1 {
-		// Return every domain, the "records" filed doesnt matter
-		filter = bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}}
-	} else if days > 0 {
-		// Return every domain that has a record found in the last days days
-		filter = bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "records.time", Value: bson.D{{Key: "$gt", Value: time.Now().AddDate(0, 0, -1*days).Unix()}}}}
-	} else {
-		return nil, fault.ErrInvalidDays
-	}
-
-	// Use Find() to find every shard of the domain
-	cursor, err := Domains.Find(context.TODO(), filter)
+	ds, err := DomainsDomains(d, days)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find: %s", err)
-	}
-	defer cursor.Close(context.TODO())
-
-	var subs []string
-
-	for cursor.Next(context.TODO()) {
-
-		r := new(FastDomain)
-
-		err = cursor.Decode(r)
-		if err != nil {
-			return nil, fmt.Errorf("failed to decode: %s", err)
-		}
-
-		subs = append(subs, r.Sub)
+		return nil, err
 	}
 
-	if err := cursor.Err(); err != nil {
-		return subs, fmt.Errorf("cursor failed: %w", err)
+	doms := make([]string, 0, len(ds))
+
+	for i := range ds {
+		doms = append(doms, ds[i].Sub)
 	}
 
-	return subs, nil
+	return doms, nil
 }
 
 // DomainsLookupFull validate, Clean() and query the DB and returns a list full domains (eg.: "www.example.com", "mail.example.com").
@@ -220,6 +180,32 @@ func DomainsLookup(d string, days int) ([]string, error) {
 // If failed to get parts of d (eg.: d is a TLD), returns ault.ErrGetPartsFailed.
 // If days if < -1, returns fault.ErrInvalidDays.
 func DomainsLookupFull(d string, days int) ([]string, error) {
+
+	ds, err := DomainsDomains(d, days)
+	if err != nil {
+		return nil, err
+	}
+
+	doms := make([]string, 0, len(ds))
+
+	for i := range ds {
+		doms = append(doms, ds[i].String())
+	}
+
+	return doms, nil
+}
+
+// DomainsDomains validate, Clean() and query the DB and returns a list of Domains.
+// days specify, that the returned Domain must have a valid record in the previous n days.
+// If days is -1, every Domain returned, including Domains that does not have a record.
+// If days is 0, return every Domain that has a record regardless of the time.
+//
+// If d has a subdomain, removes it before the query.
+//
+// If d is invalid return fault.ErrInvalidDomain.
+// If failed to get parts of d (eg.: d is a TLD), returns ault.ErrGetPartsFailed.
+// If days if < -1, returns fault.ErrInvalidDays.
+func DomainsDomains(d string, days int) ([]Domain, error) {
 
 	if !dns.IsValid(d) {
 		return nil, fault.ErrInvalidDomain
@@ -254,18 +240,18 @@ func DomainsLookupFull(d string, days int) ([]string, error) {
 	}
 	defer cursor.Close(context.TODO())
 
-	var doms []string
+	var doms []Domain
 
 	for cursor.Next(context.TODO()) {
 
-		r := new(FastDomain)
+		r := new(Domain)
 
 		err = cursor.Decode(r)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode: %s", err)
 		}
 
-		doms = append(doms, r.String())
+		doms = append(doms, *r)
 	}
 
 	if err := cursor.Err(); err != nil {
