@@ -57,8 +57,8 @@ lang = "en"
 # Icon pack "fab" includes social network icons, see: https://fontawesome.com/icons?d=gallery&s=brands&m=free
 # Icon pack "fas" includes solid style icons, see: https://fontawesome.com/icons?d=gallery&s=solid&m=free
 [[params.social]]
-url = "https://github.com/elmasy-com?q=columbus&type=all&language=&sort="
-icon = "github"                                                           # icon name without the 'fa-'
+url = "https://github.com/elmasy-com/columbus"
+icon = "github"                                # icon name without the 'fa-'
 icon_pack = "fab"
 [[params.social]]
 url = "https://infosec.exchange/@elmasy"
