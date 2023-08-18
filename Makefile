@@ -16,11 +16,20 @@ GOFLAGS = -tags "netgo,osusergo" -ldflags='$(LDFLAGS)'
 update-deps:
 	cd ./server/cmd/ && go mod tidy && go get -u
 	cd ./scanner/ && go mod tidy && go get -u
+	cd ./dns/ && go mod tidy && go get -u
 
 release-dirs:
 	if [ ! -d "./release" ];			then mkdir ./release			; fi
-	if [ ! -d "./release/server" ];	then mkdir ./release/server		; fi
+	if [ ! -d "./release/server" ];		then mkdir ./release/server		; fi
 	if [ ! -d "./release/scanner" ];	then mkdir ./release/scanner	; fi
+	if [ ! -d "./release/dns" ];		then mkdir ./release/dns	; fi
+
+
+##########
+# all
+##########
+
+release: server-release scanner-release dns-release
 
 
 ##########
@@ -74,7 +83,26 @@ scanner-release: scanner-clean scanner-build
 	@cd ./release/scanner/ && sha512sum * | gpg --local-user daniel@elmasy.com -o checksum.txt --clearsign
 
 ##########
-# all
+# dns
 ##########
 
-release: server-release scanner-release
+# Delete dns release files
+dns-clean:
+	@if [ -e "./release/dns/columbus-dns" ];			then rm -rf "./release/dns/columbus-dns"			; fi
+	@if [ -e "./release/dns/dns.conf" ];     			then rm -rf "./release/dns/dns.conf"				; fi
+	@if [ -e "./release/dns/columbus-dns.service" ];	then rm -rf "./release/dns/columbus-dns.service"	; fi
+	@if [ -e "./release/dns/checksum.txt" ];			then rm -rf "./release/dns/checksum.txt"			; fi
+
+# Prod build of the dns
+dns-build: release-dirs dns-clean
+	go build -o release/dns/columbus-dns $(GOFLAGS) ./dns/.
+
+# Dev build of the dns, use --race flag and build onto ./internal directory
+dns-build-dev: release-dirs
+	go build --race -o internal/columbus-dns ./dns/.
+
+# Release: build, copy the misc files and create a signed checksum file
+dns-release: dns-clean dns-build
+	@cp ./dns/dns.conf ./release/dns/dns.conf
+	@cp ./dns/columbus-dns.service ./release/dns/columbus-dns.service
+	@cd ./release/dns/ && sha512sum * | gpg --local-user daniel@elmasy.com -o checksum.txt --clearsign
