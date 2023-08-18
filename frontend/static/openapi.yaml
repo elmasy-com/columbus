@@ -231,31 +231,37 @@ paths:
           description: Bad Gateway. Upstream failed.
         '504':
           description: Gateway Timeout. Upstream response takes too long.
+          
   /api/history/{domain}:
     get:
       tags:
         - domain
-      summary: History of the given domain.
+      summary: DNS record history.
       description: |
     
-        Returns the DNS history of the given FQDN.
+        Returns the DNS history for the given domain and its subdomains.
         
-        The `type` codes can be found here: [https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml)
+        The `type` codes can be found here: [https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml).
+        
+        The `time` field is the time in Unix timestamp when the record last seen.
         
         # Note
-        - **EXPERIMENTAL FEATURE**
+        - **EXPERIMENTAL FEATURE!**
+        - The subdomain part will be trimmed (eg.: `/api/history/totally.invalid.elmasy.com` will be the same as `/api/lookup/elmasy.com`).
+        - If `domain` not found, the server saves for later process.
       parameters:
         - name: domain
           in: path
-          description: Fully Qualified Domain Name to get the subdomains.
+          description: Domain to search.
           required: true
           schema:
             type: string
         - name: days
           in: query
           description:  | 
-            - If `days` greater than 0, returns records seen in the last `days` days.
-            - If `days` is 0 or -1, returns subdomains every records regardless of the age.
+            - If `days` greater than 0, returns domains that has a valid DNS record in the last `days` days.
+            - If `days` is 0 or -1, returns domains that has a valid DNS record regardless of the age.
+            - If `days` is -1, returns every known domain with possible empty records.
 
             If omitted, returns every records (aka the default `days` is -1).
           required: false
@@ -267,7 +273,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Records'
+                $ref: '#/components/schemas/History'
         '400':
           description: Invalid domain or days
           content:
@@ -548,14 +554,27 @@ components:
                 type: integer
               size:
                 type: integer
+    Record:
+      type: object
+      properties:
+        type:
+          type: integer
+        value:
+          type: string
+        time:
+          type: integer
     Records:
-        type: array
-        items:
-            type: object
-            properties:
-              type:
-                type: integer
-              value:
-                type: string
-              time:
-                type: integer
+      type: array
+      items:
+        $ref: '#/components/schemas/Record'
+    History:
+      type: array
+      items:
+        type: object
+        properties:
+          domain:
+            type: string
+          records:
+            $ref: '#/components/schemas/Records'
+        
+      
