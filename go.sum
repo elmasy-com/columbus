@@ -11,12 +11,12 @@ github.com/chenzhuoyu/iasm v0.9.0/go.mod h1:Xjy2NpN3h7aUqeqM+woSuuvxmIe6+DDsiNLI
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/elmasy-com/elnet v0.0.0-20230817234858-4b6eba90d152 h1:8av30jgwaBcCN3ZFO4AFeSqg5vAWT2uElT/MtwTEaRc=
-github.com/elmasy-com/elnet v0.0.0-20230817234858-4b6eba90d152/go.mod h1:Ipw9Fan6o3EEYTJQ4qFRKM66WbNPRCi+dHVyAS08WT8=
+github.com/elmasy-com/elnet v0.0.0-20230818142121-a28d397dc991 h1:dGnb99mV71xur+VqwidDt3moXn7drnDjLZWPK0gsE9Q=
+github.com/elmasy-com/elnet v0.0.0-20230818142121-a28d397dc991/go.mod h1:Ipw9Fan6o3EEYTJQ4qFRKM66WbNPRCi+dHVyAS08WT8=
 github.com/elmasy-com/slices v0.0.0-20230712174526-6eb4e5e38b73 h1:9I1IZOvF7XurN0VQiUn23i3o7vY6Gm8+RZBK2iEBtpQ=
 github.com/elmasy-com/slices v0.0.0-20230712174526-6eb4e5e38b73/go.mod h1:0DO/qXOgrnrXU44i+9JQzusxxxx6WPPW7WQeV/RJLLM=
-github.com/g0rbe/slitu v1.0.5 h1:DCjUOHSN+aZiAaperOMppcRkW0k8bBYX+9SlPtg/rmE=
-github.com/g0rbe/slitu v1.0.5/go.mod h1:Aa/XZJV+hyeffFu1+ie3mHwOy9ygJ/blK+V50hHlxbo=
+github.com/g0rbe/slitu v1.0.6 h1:Gl1VZRM/7uTXAhDoK+vOaUo2FYyhJ45Ue0KAszmG6f0=
+github.com/g0rbe/slitu v1.0.6/go.mod h1:Aa/XZJV+hyeffFu1+ie3mHwOy9ygJ/blK+V50hHlxbo=
 github.com/gabriel-vasile/mimetype v1.4.2 h1:w5qFW6JKBz9Y393Y4q372O9A7cUSequkh1Q7OhCmWKU=
 github.com/gabriel-vasile/mimetype v1.4.2/go.mod h1:zApsH/mKG4w07erKIaJPFiX0Tsq9BFQgN3qGY5GnNgA=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=

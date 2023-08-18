@@ -3,9 +3,9 @@ module github.com/elmasy-com/columbus
 go 1.19
 
 require (
-	github.com/elmasy-com/elnet v0.0.0-20230817234858-4b6eba90d152
+	github.com/elmasy-com/elnet v0.0.0-20230818142121-a28d397dc991
 	github.com/elmasy-com/slices v0.0.0-20230712174526-6eb4e5e38b73
-	github.com/g0rbe/slitu v1.0.5
+	github.com/g0rbe/slitu v1.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/miekg/dns v1.1.55
 	go.mongodb.org/mongo-driver v1.12.1
