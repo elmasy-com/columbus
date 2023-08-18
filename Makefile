@@ -17,6 +17,7 @@ server-clean:
 	@if [ -e "./release/server/columbus-server" ];			then rm -rf "./release/server/columbus-server"			; fi
 	@if [ -e "./release/server/server.conf" ];     			then rm -rf "./release/server/server.conf"				; fi
 	@if [ -e "./release/server/columbus-server.service" ];	then rm -rf "./release/server/columbus-server.service"	; fi
+	@if [ -e "./release/server/checksum.txt" ];				then rm -rf "./release/server/checksum.txt"				; fi
 
 # Prod build of the server
 server-build: server-clean
@@ -31,3 +32,5 @@ server-release: server-clean server-build
 	@cp ./server/server.conf ./release/server/server.conf
 	@cp ./server/columbus-server.service ./release/server/columbus-server.service
 	@cd ./release/server/ && sha512sum * | gpg --local-user daniel@elmasy.com -o checksum.txt --clearsign
+
+release: server-release
