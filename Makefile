@@ -29,8 +29,9 @@ release-dirs:
 # all
 ##########
 
-release: server-release scanner-release dns-release
+build: server-build scanner-build dns-build
 
+release: server-release scanner-release dns-release
 
 ##########
 # server
