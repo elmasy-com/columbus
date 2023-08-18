@@ -14,6 +14,7 @@ GOFLAGS = -tags "netgo,osusergo" -ldflags='$(LDFLAGS)'
 
 # Update go.mod
 update-deps:
+	cd ./dns/ && go mod tidy && go get -u
 	cd ./server/cmd/ && go mod tidy && go get -u
 	cd ./scanner/ && go mod tidy && go get -u
 	cd ./dns/ && go mod tidy && go get -u
