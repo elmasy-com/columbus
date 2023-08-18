@@ -1,3 +1,4 @@
 /release
 /internal
 /frontend/.hugo_build.lock
+/frontend/public
