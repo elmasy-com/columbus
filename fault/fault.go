@@ -38,4 +38,5 @@ var (
 	ErrDataBase       = ColumbusError{"Database error"}
 	ErrGetPartsFailed = ColumbusError{"GetParts() failed"}
 	ErrInvalidDays    = ColumbusError{"invalid days"}
+	ErrTLDOnly        = ColumbusError{"TLD only"}
 )

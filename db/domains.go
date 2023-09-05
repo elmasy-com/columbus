@@ -151,7 +151,8 @@ func DomainsInsertWithRecord(d string) error {
 // If d has a subdomain, removes it before the query.
 //
 // If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
+// If failed to get parts of d because of d is just a TLD, returns fault.ErrTLDOnly.
+// If failed to get parts of d, returns fault.ErrGetPartsFailed.
 // If days if < -1, returns fault.ErrInvalidDays.
 func DomainsLookup(d string, days int) ([]string, error) {
 
@@ -177,7 +178,8 @@ func DomainsLookup(d string, days int) ([]string, error) {
 // If d has a subdomain, removes it before the query.
 //
 // If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns ault.ErrGetPartsFailed.
+// If failed to get parts of d because of d is just a TLD, returns fault.ErrTLDOnly.
+// If failed to get parts of d, returns fault.ErrGetPartsFailed.
 // If days if < -1, returns fault.ErrInvalidDays.
 func DomainsLookupFull(d string, days int) ([]string, error) {
 
@@ -203,7 +205,8 @@ func DomainsLookupFull(d string, days int) ([]string, error) {
 // If d has a subdomain, removes it before the query.
 //
 // If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns ault.ErrGetPartsFailed.
+// If failed to get parts of d because of d is just a TLD, returns fault.ErrTLDOnly.
+// If failed to get parts of d, returns fault.ErrGetPartsFailed.
 // If days if < -1, returns fault.ErrInvalidDays.
 func DomainsDomains(d string, days int) ([]Domain, error) {
 
@@ -214,8 +217,11 @@ func DomainsDomains(d string, days int) ([]Domain, error) {
 	d = dns.Clean(d)
 
 	p := dns.GetParts(d)
-	if p == nil || p.Domain == "" || p.TLD == "" {
+	if p == nil || p.TLD == "" {
 		return nil, fault.ErrGetPartsFailed
+	}
+	if p.Domain == "" {
+		return nil, fault.ErrTLDOnly
 	}
 
 	var doc primitive.D
@@ -347,7 +353,8 @@ func DomainsStarts(d string) ([]string, error) {
 // Returns records for the exact domain d.
 //
 // If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns ault.ErrGetPartsFailed.
+// If failed to get parts of d because of d is just a TLD, returns fault.ErrTLDOnly.
+// If failed to get parts of d, returns fault.ErrGetPartsFailed.
 // If days if < -1, returns fault.ErrInvalidDays.
 func DomainsRecords(d string, days int) ([]Record, error) {
 
@@ -358,8 +365,11 @@ func DomainsRecords(d string, days int) ([]Record, error) {
 	d = dns.Clean(d)
 
 	p := dns.GetParts(d)
-	if p == nil || p.Domain == "" || p.TLD == "" {
+	if p == nil || p.TLD == "" {
 		return nil, fault.ErrGetPartsFailed
+	}
+	if p.Domain == "" {
+		return nil, fault.ErrTLDOnly
 	}
 
 	var doc primitive.D
@@ -405,7 +415,8 @@ func DomainsRecords(d string, days int) ([]Record, error) {
 // DomainsUpdateUpdatedTime updated the "updated" timestamp to the current time to domain d.
 //
 // If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
+// If failed to get parts of d because of d is just a TLD, returns fault.ErrTLDOnly.
+// If failed to get parts of d, returns fault.ErrGetPartsFailed.
 func DomainsUpdateUpdatedTime(d string) error {
 
 	if !validator.Domain(d) {
@@ -415,8 +426,11 @@ func DomainsUpdateUpdatedTime(d string) error {
 	d = dns.Clean(d)
 
 	p := dns.GetParts(d)
-	if p == nil || p.Domain == "" || p.TLD == "" {
+	if p == nil || p.TLD == "" {
 		return fault.ErrGetPartsFailed
+	}
+	if p.Domain == "" {
+		return fault.ErrTLDOnly
 	}
 
 	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
@@ -433,7 +447,8 @@ func DomainsUpdateUpdatedTime(d string) error {
 // Return false, nil id d is not exists in the database (ignore mongo.ErrNoDocuments).
 //
 // If d is invalid return fault.ErrInvalidDomain.
-// If failed to get parts of d (eg.: d is a TLD), returns fault.ErrGetPartsFailed.
+// If failed to get parts of d because of d is just a TLD, returns fault.ErrTLDOnly.
+// If failed to get parts of d, returns fault.ErrGetPartsFailed.
 func DomainsUpdatedRecently(d string) (bool, error) {
 
 	if !validator.Domain(d) {
@@ -443,8 +458,11 @@ func DomainsUpdatedRecently(d string) (bool, error) {
 	d = dns.Clean(d)
 
 	p := dns.GetParts(d)
-	if p == nil || p.Domain == "" || p.TLD == "" {
+	if p == nil || p.TLD == "" {
 		return false, fault.ErrGetPartsFailed
+	}
+	if p.Domain == "" {
+		return false, fault.ErrTLDOnly
 	}
 
 	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}

@@ -71,6 +71,8 @@ func GetSearchResult(c *gin.Context) {
 			c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
 		case errors.Is(err, fault.ErrInvalidDays):
 			c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+		case errors.Is(err, fault.ErrTLDOnly):
+			c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
 		default:
 			c.Data(http.StatusInternalServerError, "text/html", []byte(searchInternalServerErrorHtml))
 		}
@@ -116,6 +118,8 @@ func GetSearchResult(c *gin.Context) {
 			case errors.Is(err, fault.ErrInvalidDomain):
 				c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
 			case errors.Is(err, fault.ErrInvalidDays):
+				c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+			case errors.Is(err, fault.ErrTLDOnly):
 				c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
 			default:
 				c.Data(http.StatusInternalServerError, "text/html", []byte(searchInternalServerErrorHtml))

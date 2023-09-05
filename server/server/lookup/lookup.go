@@ -61,6 +61,8 @@ func GetApiLookup(c *gin.Context) {
 			respCode = http.StatusBadRequest
 		case errors.Is(err, fault.ErrInvalidDays):
 			respCode = http.StatusBadRequest
+		case errors.Is(err, fault.ErrTLDOnly):
+			respCode = http.StatusBadRequest
 		default:
 			respCode = http.StatusInternalServerError
 			err = fmt.Errorf("internal server error")
