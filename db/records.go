@@ -137,6 +137,12 @@ func RecordsUpdate(d string, ignoreUpdated bool) error {
 	}
 
 	for i := range records {
+
+		// Skip empty records
+		if records[i].Value == "" {
+			continue
+		}
+
 		_, err := RecordsInsert(d, records[i].Type, records[i].Value)
 		if err != nil {
 			return fmt.Errorf("failed to insert record: %w", err)
