@@ -94,13 +94,6 @@ func GetApiLookup(c *gin.Context) {
 		return
 	}
 
-	// Send to db.RecordsUpdaterDomainChan if the channle if not full to update the DNS records.
-	// Send only if any subdomain found.
-	// In db.RecordsUpdaterDomainChan, every record for domain d is updated if not updated in the last hour.
-	if len(db.RecordsUpdaterDomainChan) < cap(db.RecordsUpdaterDomainChan) {
-		db.RecordsUpdaterDomainChan <- d
-	}
-
 	_, err = db.TopListInsert(d)
 	if err != nil {
 		c.Error(fmt.Errorf("failed to insert topList: %w", err))

@@ -258,6 +258,11 @@ func DomainsDomains(d string, days int) ([]Domain, error) {
 		}
 
 		doms = append(doms, *r)
+
+		// Send to db.RecordsUpdaterDomainChan if the channle if not full to update the DNS records.
+		if len(RecordsUpdaterDomainChan) < cap(RecordsUpdaterDomainChan) {
+			RecordsUpdaterDomainChan <- r.String()
+		}
 	}
 
 	if err := cursor.Err(); err != nil {

@@ -170,34 +170,12 @@ func recordsUpdaterRoutine(wg *sync.WaitGroup) {
 			d = dom
 		}
 
-		if dns.HasSub(d) {
+		increaseTotalUpdated()
 
-			increaseTotalUpdated()
-
-			// d is a FQDN
-			err := RecordsUpdate(d, false)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to update DNS records for %s: %s\n", d, err)
-			}
-
-		} else {
-
-			// If domain sent instead of FQDN, get every subdomain and updates it
-			ds, err := DomainsLookupFull(d, -1)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to update DNS records for %s: %s\n", d, err)
-				continue
-			}
-
-			for i := range ds {
-
-				increaseTotalUpdated()
-
-				err := RecordsUpdate(ds[i], false)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Failed to update DNS records for %s: %s\n", ds[i], err)
-				}
-			}
+		// d is a FQDN
+		err := RecordsUpdate(d, false)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to update DNS records for %s: %s\n", d, err)
 		}
 	}
 }
