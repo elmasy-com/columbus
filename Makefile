@@ -18,6 +18,7 @@ update-deps:
 	cd ./server/cmd/ && go mod tidy && go get -u
 	cd ./scanner/ && go mod tidy && go get -u
 	cd ./dns/ && go mod tidy && go get -u
+	cd ./frontend && npm update
 
 release-dirs:
 	if [ ! -d "./release" ];			then mkdir ./release			; fi
@@ -32,7 +33,24 @@ release-dirs:
 
 build: server-build scanner-build dns-build
 
-release: server-release scanner-release dns-release
+release: frontend-build server-release scanner-release dns-release
+
+##########
+# frontend
+##########
+
+frontend-clean:
+	@if [ -e "./frontend/node_modules" ];	then rm -rf "./frontend/node_modules"	; fi
+	@if [ -e "./frontend/style.css" ];	then rm -rf "./frontend/style.css"	; fi
+
+
+frontend-build: frontend-clean
+	cd frontend/ && npm install
+	echo '{{ define "stylecss" }}' > frontend/templates/stylecss.tmpl
+	cd frontend/ && tailwindcss -o style.css --minify
+	cat frontend/style.css >> frontend/templates/stylecss.tmpl
+	echo '{{ end }}' >> frontend/templates/stylecss.tmpl
+
 
 ##########
 # server
@@ -46,11 +64,11 @@ server-clean:
 	@if [ -e "./release/server/checksum.txt" ];				then rm -rf "./release/server/checksum.txt"				; fi
 
 # Prod build of the server
-server-build: release-dirs server-clean
+server-build: release-dirs server-clean frontend-build
 	go build -o release/server/columbus-server $(GOFLAGS) ./server/cmd/.
 
 # Dev build of the server, use --race flag and build onto ./internal directory
-server-build-dev: release-dirs
+server-build-dev: release-dirs frontend-build
 	go build --race -o internal/columbus-server ./server/cmd/.
 
 # Release: build, copy the misc files and create a signed checksum file
