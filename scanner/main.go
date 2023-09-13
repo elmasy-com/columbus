@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -55,8 +56,8 @@ func main() {
 	}
 	defer db.Disconnect()
 
-	LogStat = new(Status)
-	LogStat.m = new(sync.Mutex)
+	LogIndex = new(atomic.Int64)
+	LogSize = new(atomic.Int64)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
@@ -70,8 +71,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Failed to load LogStat: %s\n", err)
 		os.Exit(1)
 	}
-	if !LogStat.HasNew() {
-		fmt.Printf("%s progress: %d/%d (%.2f%%)\n", Conf.LogName, LogStat.GetIndex(), LogStat.GetSize(), float64(LogStat.GetIndex())/float64(LogStat.GetSize())*100)
+	if !LogHasNew() {
+		fmt.Printf("%s progress: %d/%d (%.2f%%)\n", Conf.LogName, LogIndex.Load(), LogSize.Load(), float64(LogIndex.Load())/float64(LogSize.Load())*100)
 	}
 
 	wg.Add(1)
@@ -93,28 +94,28 @@ infiniteLoop:
 			break infiniteLoop
 		default:
 
-			if !LogStat.HasNew() {
+			if !LogHasNew() {
 				// Nothing new, sleep a bit and retry
 				slitu.Sleep(ctx, 5*time.Second)
 				continue infiniteLoop
 			} else {
-				fmt.Printf("%s progress: %d/%d (%.2f%%)\n", Conf.LogName, LogStat.GetIndex(), LogStat.GetSize(), float64(LogStat.GetIndex())/float64(LogStat.GetSize())*100)
+				fmt.Printf("%s progress: %d/%d (%.2f%%)\n", Conf.LogName, LogIndex.Load(), LogSize.Load(), float64(LogIndex.Load())/float64(LogSize.Load())*100)
 			}
 
-			doms, n, err := ctlog.GetDomains(Conf.Log.URI, LogStat.GetIndex())
+			doms, n, err := ctlog.GetDomains(Conf.Log.URI, LogIndex.Load())
 			if err != nil {
 
 				switch {
 				case strings.Contains(err.Error(), "NonFatalErrors"):
 					// NonFatalErrors means failed to convert one entry, skip it and continue
-					fmt.Fprintf(os.Stderr, "Non fatal error occured while getting domains at index %d (continue from index %d): %s\n", LogStat.GetIndex()+n, LogStat.GetIndex()+n+1, err)
+					fmt.Fprintf(os.Stderr, "Non fatal error occured while getting domains at index %d (continue from index %d): %s\n", LogIndex.Load()+n, LogIndex.Load()+n+1, err)
 					// Add +1 to n to skip the failed entry
 					n += 1
 				case strings.Contains(err.Error(), "429 Too Many Requests"):
 					fmt.Printf("Sleeping for 60 seconds because of too many request...\n")
 					time.Sleep(60 * time.Second)
 				default:
-					fmt.Fprintf(os.Stderr, "Failed to get domains at index %d: %s\n", LogStat.GetIndex()+n, err)
+					fmt.Fprintf(os.Stderr, "Failed to get domains at index %d: %s\n", LogIndex.Load()+n, err)
 					Cancel()
 					break infiniteLoop
 				}
@@ -124,7 +125,7 @@ infiniteLoop:
 				domainChan <- doms[i]
 			}
 
-			LogStat.AddIndex(n)
+			LogIndex.Add(n)
 		}
 	}
 

@@ -18,7 +18,8 @@ func InsertWorker(doms <-chan string, wg *sync.WaitGroup) {
 
 	for dom := range doms {
 
-		if _, err := db.DomainsInsert(dom); err != nil {
+		_, err := db.DomainsInsert(dom)
+		if err != nil {
 
 			// Failed insert is fatal error. Dont want to miss any domain.
 			fmt.Fprintf(os.Stderr, "Failed to write %s: %s\n", dom, err)

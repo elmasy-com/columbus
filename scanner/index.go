@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/elmasy-com/columbus/db"
@@ -14,61 +15,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Status struct {
-	Index int64
-	Size  int64
-	m     *sync.Mutex
+var (
+	LogIndex *atomic.Int64
+	LogSize  *atomic.Int64
+)
+
+func LogHasNew() bool {
+
+	return LogSize.Load()-LogIndex.Load() > 0
 }
-
-func (s *Status) GetIndex() int64 {
-
-	s.m.Lock()
-	defer s.m.Unlock()
-
-	return s.Index
-}
-
-func (s *Status) SetIndex(n int64) {
-
-	s.m.Lock()
-	defer s.m.Unlock()
-
-	s.Index = n
-}
-
-func (s *Status) AddIndex(n int64) {
-
-	s.m.Lock()
-	defer s.m.Unlock()
-
-	s.Index += int64(n)
-}
-
-func (s *Status) GetSize() int64 {
-
-	s.m.Lock()
-	defer s.m.Unlock()
-
-	return s.Size
-}
-
-func (s *Status) SetSize(n int64) {
-
-	s.m.Lock()
-	defer s.m.Unlock()
-
-	s.Size = n
-}
-
-func (s *Status) HasNew() bool {
-
-	s.m.Lock()
-	defer s.m.Unlock()
-
-	return s.Size-s.Index > 0
-}
-
-var LogStat *Status
 
 func LogStatSizeUpdater(ctx context.Context, wg *sync.WaitGroup) {
 
@@ -92,7 +47,9 @@ func LogStatSizeUpdater(ctx context.Context, wg *sync.WaitGroup) {
 				}
 			} else {
 
-				LogStat.SetSize(s)
+				LogSize.Store(s)
+
+				time.Sleep(5 * time.Second)
 			}
 		}
 	}
@@ -113,7 +70,7 @@ func LogStatSaver(ctx context.Context, wg *sync.WaitGroup) {
 			return
 		case <-ticker.C:
 
-			err := db.CTLogsUpdate(Conf.LogName, LogStat.GetIndex(), LogStat.GetSize())
+			err := db.CTLogsUpdate(Conf.LogName, LogIndex.Load(), LogSize.Load())
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to update LogStat in the database: %s\n", err)
 				Cancel()
@@ -136,9 +93,9 @@ func LoadLogStat() error {
 		s = new(db.CTLogSchema)
 	}
 
-	LogStat.SetIndex(s.Index)
+	LogIndex.Store(s.Index)
 
-	LogStat.SetSize(s.Size)
+	LogSize.Store(s.Size)
 
 	return nil
 }
