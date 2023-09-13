@@ -203,14 +203,15 @@ func recordsUpdaterRoutine(wg *sync.WaitGroup) {
 }
 
 // RandomDomainUpdater is a function created to run as goroutine in the background.
-// Select random entries (FQDNs) and send it to internalRecordsUpdaterDomainChan to update the records.
+// Select random *old* entries (FQDNs) and send it to internalRecordsUpdaterDomainChan to update the records.
 func RandomDomainUpdater(wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
 	for {
 
-		cursor, err := Domains.Aggregate(context.TODO(), bson.A{bson.M{"$sample": bson.M{"size": 1000}}})
+		// Get domains that not updated in the last 30 days
+		cursor, err := Domains.Find(context.TODO(), bson.M{"$or": bson.A{bson.M{"updated": bson.M{"$lt": time.Now().Add(720 * time.Hour).Unix()}}, bson.M{"updated": bson.M{"$exists": false}}}})
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "RandomDomainUpdater() failed to find toplist: %s\n", err)
 			// Wait before the next try
@@ -220,6 +221,11 @@ func RandomDomainUpdater(wg *sync.WaitGroup) {
 
 		for cursor.Next(context.TODO()) {
 
+			// Randomize what domain to update
+			if rand.Intn(5) != 5 {
+				continue
+			}
+
 			d := new(Domain)
 
 			err = cursor.Decode(d)
@@ -228,13 +234,7 @@ func RandomDomainUpdater(wg *sync.WaitGroup) {
 				break
 			}
 
-			// TODO: Remove
-			if d.Updated != 0 {
-				continue
-			}
-
 			internalRecordsUpdaterDomainChan <- d.String()
-
 		}
 
 		if err = cursor.Err(); err != nil {
