@@ -442,9 +442,9 @@ func DomainsUpdateUpdatedTime(d string) error {
 	return err
 }
 
-// DomainsUpdatedRecently check whether domain d is updated recently (in the previous hour).
+// DomainsUpdatedRecently check whether domain d is updated recently (in the previous 12 hours).
 //
-// Return false, nil id d is not exists in the database (ignore mongo.ErrNoDocuments).
+// Return false, nil if d is not exists in the database (ignore mongo.ErrNoDocuments).
 //
 // If d is invalid return fault.ErrInvalidDomain.
 // If failed to get parts of d because of d is just a TLD, returns fault.ErrTLDOnly.
@@ -465,14 +465,19 @@ func DomainsUpdatedRecently(d string) (bool, error) {
 		return false, fault.ErrTLDOnly
 	}
 
-	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}}
+	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}, {Key: "updated", Value: bson.M{"$gt": time.Now().Add(-12 * time.Hour).Unix()}}}
 
 	dom := new(Domain)
 
 	err := Domains.FindOne(context.TODO(), filter).Decode(dom)
-	if err != nil && errors.Is(err, mongo.ErrNoDocuments) {
+
+	if err == nil {
+		return true, nil
+	}
+
+	if errors.Is(err, mongo.ErrNoDocuments) {
 		return false, nil
 	}
 
-	return dom.Updated > time.Now().Unix()-3600, err
+	return false, err
 }
