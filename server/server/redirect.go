@@ -24,3 +24,9 @@ func RedirectLookup(c *gin.Context) {
 		c.Status(http.StatusMovedPermanently)
 	}
 }
+
+func RedirectSwagger(c *gin.Context) {
+
+	c.Header("location", "https://columbus.elmasy.com/swagger/index.html")
+	c.Status(http.StatusTemporaryRedirect)
+}

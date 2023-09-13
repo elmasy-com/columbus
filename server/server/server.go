@@ -67,7 +67,7 @@ func Run() error {
 	router.GET("/api/history/:domain", history.GetApiHistory)
 
 	router.GET("/api/stat", stat.GetApiStat)
-	// TODO: router.GET("/stat", stat.GetStat)
+	router.GET("/stat", stat.RedirectStat)
 
 	router.GET("/search", search.GetSearchRedirect)
 	router.GET("/search/:domain", search.GetSearch)
@@ -88,6 +88,7 @@ func Run() error {
 	router.GET("/tools/isvalid/:fqdn", Redirect)
 
 	router.GET("/sitemap.xml", frontend.GetSitemapXML)
+	router.GET("/swagger/", RedirectSwagger)
 
 	srv := &http.Server{
 		Addr:    config.Address,
