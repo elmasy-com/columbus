@@ -87,7 +87,6 @@ func Run() error {
 	router.GET("/tools/subdomain/:fqdn", Redirect)
 	router.GET("/tools/isvalid/:fqdn", Redirect)
 
-	router.GET("/sitemap.xml", frontend.GetSitemapXML)
 	router.GET("/swagger/", RedirectSwagger)
 
 	srv := &http.Server{
