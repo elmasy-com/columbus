@@ -9,10 +9,18 @@ import (
 
 func Redirect(c *gin.Context) {
 
-	c.Redirect(http.StatusPermanentRedirect, fmt.Sprintf("/api%s", c.Request.RequestURI))
+	c.Header("location", fmt.Sprintf("/api%s", c.Request.RequestURI))
+	c.Status(http.StatusMovedPermanently)
 }
 
 func RedirectLookup(c *gin.Context) {
 
-	c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/search/%s", c.Param("domain")))
+	accept := c.Request.Header.Get("Accept")
+	if accept == "" || accept == "*/*" || accept == "application/json" || accept == "text/plain" {
+		c.Header("location", fmt.Sprintf("/api/lookup/%s", c.Param("domain")))
+		c.Status(http.StatusMovedPermanently)
+	} else {
+		c.Header("location", fmt.Sprintf("/search/%s", c.Param("domain")))
+		c.Status(http.StatusMovedPermanently)
+	}
 }

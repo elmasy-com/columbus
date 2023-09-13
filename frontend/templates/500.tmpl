@@ -1,0 +1,45 @@
+{{ define "500" }}
+<!doctype html>
+<html lang="en-US">
+
+<head>
+
+    {{ template "meta" .Meta }}
+
+</head>
+
+<body class="bg-base-100 max-w-[90%] lg:max-w-[80%] xl:max-w-[60%] 2xl:max-w-[40%] m-auto">
+
+    <div class="min-h-screen flex flex-col">
+
+        <!-- Header-->
+        {{ template "header" }}
+
+        <div class="flex-auto flex flex-col justify-center">
+
+            <img class="w-[20%] mx-auto" src="/logo.svg" alt="Logo" />
+
+            <h1 class="max-lg:text-3xl lg:text-5xl font-bold max-lg:py-3 lg:py-6 mx-auto">500 - Internal Server Error
+            </h1>
+
+
+            <h2 class="max-lg:text-2xl lg:text-4xl font-bold max-lg:py-3 lg:py-6 mx-auto">
+                You found and error, congratulations!
+            </h2>
+
+            <h3 class="max-lg:text-xl lg:text-2xl max-lg:py-3 lg:py-6 mx-auto">
+                <a class="link link-primary"
+                    href="https://github.com/elmasy-com/columbus/issues/new?title=Internal%20Server%20Error%20on%20{{ .Meta.Slug }}&body=Internal%20Server%20Error%20on%20%60{{ .Meta.Slug }}%60%20at%20{{ .Date }}%2E"
+                    target="_blank" rel="noopener noreferrer">
+                    Open a new issue on GitHub
+                </a>
+            </h3>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
+{{ end }}

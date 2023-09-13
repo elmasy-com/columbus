@@ -4,62 +4,38 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/elmasy-com/columbus/db"
 	"github.com/elmasy-com/columbus/fault"
+	"github.com/elmasy-com/columbus/frontend"
 	"github.com/elmasy-com/elnet/dns"
+	"github.com/elmasy-com/elnet/validator"
 	"github.com/gin-gonic/gin"
 )
 
-type RecordsData struct {
-	Type  string
-	Value string
-	Time  string
+func GetSearchRedirect(c *gin.Context) {
+
+	c.Redirect(http.StatusTemporaryRedirect, "/#search")
 }
-
-type DomainsData struct {
-	Domain  string
-	Records []RecordsData
-}
-
-type SearchData struct {
-	Question string
-	Domains  []DomainsData
-	Unknowns []string
-	Error    error
-}
-
-//go:embed search.html
-var searchHtml string
-
-//go:embed searchResult.html
-var searchResultHtml string
-
-//go:embed searchBadRequest.html
-var searchBadrequestHtml string
-
-//go:embed searchInternalServerError.html
-var searchInternalServerErrorHtml string
-
-//go:embed searchNotFound.html
-var searchNotFoundHtml string
 
 func GetSearch(c *gin.Context) {
-
-	c.Data(http.StatusOK, "text/html", []byte(searchHtml))
-}
-
-func GetSearchResult(c *gin.Context) {
 
 	var err error
 	var doms []string
 
 	// Parse domain param
-	d := c.Param("domain")
+	d := dns.Clean(c.Param("domain"))
+
+	// Redirect client to the base domain if FQDN used (eg.: /search/www.example.com -> /search/example.com)
+	if validator.Domain(d) && dns.HasSub(d) {
+		c.Header("location", fmt.Sprintf("/search/%s", dns.GetDomain(d)))
+		c.Status(http.StatusMovedPermanently)
+		return
+	}
 
 	doms, err = db.DomainsLookupFull(d, -1)
 	if err != nil {
@@ -68,13 +44,13 @@ func GetSearchResult(c *gin.Context) {
 
 		switch {
 		case errors.Is(err, fault.ErrInvalidDomain):
-			c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+			frontend.Get400HTML(c, fault.ErrInvalidDomain)
 		case errors.Is(err, fault.ErrInvalidDays):
-			c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+			frontend.Get400HTML(c, fault.ErrInvalidDays)
 		case errors.Is(err, fault.ErrTLDOnly):
-			c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+			frontend.Get400HTML(c, fault.ErrTLDOnly)
 		default:
-			c.Data(http.StatusInternalServerError, "text/html", []byte(searchInternalServerErrorHtml))
+			frontend.Get500HTML(c)
 		}
 
 		return
@@ -87,7 +63,7 @@ func GetSearchResult(c *gin.Context) {
 			c.Error(fmt.Errorf("failed to insert notFound: %w", err))
 		}
 
-		c.Data(http.StatusNotFound, "text/html", []byte(searchNotFoundHtml))
+		frontend.Get404HTML(c, d)
 		return
 
 	}
@@ -105,7 +81,7 @@ func GetSearchResult(c *gin.Context) {
 		db.RecordsUpdaterDomainChan <- d
 	}
 
-	searchData := SearchData{Question: d}
+	searchData := frontend.SearchData{Question: d}
 
 	for i := range doms {
 
@@ -116,13 +92,13 @@ func GetSearchResult(c *gin.Context) {
 
 			switch {
 			case errors.Is(err, fault.ErrInvalidDomain):
-				c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+				frontend.Get400HTML(c, fault.ErrInvalidDomain)
 			case errors.Is(err, fault.ErrInvalidDays):
-				c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+				frontend.Get400HTML(c, fault.ErrInvalidDays)
 			case errors.Is(err, fault.ErrTLDOnly):
-				c.Data(http.StatusBadRequest, "text/html", []byte(searchBadrequestHtml))
+				frontend.Get400HTML(c, fault.ErrTLDOnly)
 			default:
-				c.Data(http.StatusInternalServerError, "text/html", []byte(searchInternalServerErrorHtml))
+				frontend.Get500HTML(c)
 			}
 
 			return
@@ -133,30 +109,35 @@ func GetSearchResult(c *gin.Context) {
 			continue
 		}
 
-		v := DomainsData{Domain: doms[i]}
+		v := frontend.DomainsData{Domain: doms[i]}
 
 		for ii := range rs {
-			v.Records = append(v.Records, RecordsData{Type: dns.TypeToString(rs[ii].Type), Value: rs[ii].Value, Time: time.Unix(rs[ii].Time, 0).String()})
+			v.Records = append(v.Records, frontend.RecordsData{Type: dns.TypeToString(rs[ii].Type), Value: rs[ii].Value, Time: time.Unix(rs[ii].Time, 0).String()})
 		}
 
-		sort.Slice(v.Records, func(i, j int) bool { return v.Records[i].Time > v.Records[j].Time })
+		sort.Slice(v.Records, func(i, j int) bool {
+
+			if v.Records[i].Type != v.Records[j].Type {
+				return v.Records[i].Type < v.Records[j].Type
+			}
+
+			return v.Records[i].Time > v.Records[j].Time
+		})
 
 		searchData.Domains = append(searchData.Domains, v)
 	}
 
-	t := template.New("searchResult")
+	searchData.Stat.Total = strconv.Itoa(len(doms))
+	searchData.Stat.WithRecords = strconv.Itoa(len(searchData.Domains))
+	searchData.Stat.WithRecordsPercent = fmt.Sprintf("%.2f", float64(len(searchData.Domains))/float64(len(doms))*100.0)
 
-	t, err = t.Parse(searchResultHtml)
-	if err != nil {
-		c.Error(fmt.Errorf("failed to parse template: %w", err))
-		c.Data(http.StatusInternalServerError, "text/html", []byte(searchInternalServerErrorHtml))
-		return
+	totalrecords := 0
+
+	for i := range searchData.Domains {
+		totalrecords += len(searchData.Domains[i].Records)
 	}
 
-	err = t.Execute(c.Writer, searchData)
-	if err != nil {
-		c.Error(fmt.Errorf("failed to execute template: %w", err))
-		c.Data(http.StatusInternalServerError, "text/html", []byte(searchInternalServerErrorHtml))
-		return
-	}
+	searchData.Stat.TotalRecords = strconv.Itoa(totalrecords)
+
+	frontend.GetSearchHtml(c, searchData)
 }

@@ -1,0 +1,26 @@
+{{ define "privacypolicy" }}
+<div class="flex-none max-lg:py-5 lg:py-10 flex flex-col" id="privacy_policy">
+
+    <h2 class="text-3xl font-bold mx-auto">Privacy Policy</h2>
+
+    <ul class="list-disc">
+        <li>Every request to the server logged and stored for 30 days.</li>
+        <li>The website is using the <a class="link link-primary"
+                href="https://plausible.io/privacy-focused-web-analytics">privacy-friendly</a> Plausible to collect
+            analytics.</li>
+        <li>Successful queries to <code class="text-primary">/api/lookup</code> saves only the <code
+                class="text-primary">domain</code> parameter for further process.<a class="link link-primary"
+                href="https://github.com/elmasy-com/columbus/blob/main/server/server/lookup/lookup.go#L99">See the
+                relevant code here</a>.
+        </li>
+        <li>Failed queries to <code class="text-primary">/api/lookup</code> saves only the <code
+                class="text-primary">domain</code> parameter for
+            further process.
+            <a class="link link-primary"
+                href="https://github.com/elmasy-com/columbus/blob/fa76a24ac667c72120715f5413c3de41b1ac357a/server/server/lookup/lookup.go#L83">See
+                the relevant codehere</a>.
+        </li>
+    </ul>
+
+</div>
+{{ end }}

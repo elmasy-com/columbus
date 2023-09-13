@@ -1,0 +1,41 @@
+{{ define "dnsserver" }}
+<div class="flex-none max-lg:py-5 lg:py-10 flex flex-col" id="dns_server">
+
+    <h2 class="text-3xl font-bold mx-auto">DNS Server</h2>
+
+    <h3 class="text-base max-lg:py-2 lg:py-12"><a class="link link-primary"
+            href="https://github.com/elmasy-com/columbus/tree/main/dns">Columbus
+            DNS</a> is a high performance DNS server to collect and update domains for Columbus Project.</h3>
+
+    <p class="py-2">The goal of this DNS server is to make it easy for everybody to contribute to the Columbus
+        Project by setting the DNS server to <code class="text-primary">dns.columbus.elmasy.com</code> while
+        enumerationg subdomains, hunting bugs, etc.</p>
+
+    <p class="font-bold py-2">IMPORTANT: This server is not meant to used as a daily DNS resolver!</p>
+
+    <p class="py-4">Server:</p>
+
+    <ul class="list-disc">
+        <li>DNS <code class="text-primary">dns.columbus.elmasy.com</code></li>
+        <li>IPv4 <code class="text-primary">142.132.164.231</code></li>
+        <li>IPv6 <code class="text-primary">2a01:4f8:1c1e:eddd::1</code></li>
+        <li>Protocol <code class="text-primary">TCP</code> and <code class="text-primary">UDP</code></li>
+    </ul>
+
+
+    <p class="max-lg:hidden lg:py-6">Example:</p>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>dig @142.132.164.231 elmasy.com</code></pre>
+    </div>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>subfinder -r 142.132.164.231 -d elmasy.com</code></pre>
+    </div>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>amass enum -tr 142.132.164.231 -d elmasy.com</code></pre>
+    </div>
+
+</div>
+{{ end }}

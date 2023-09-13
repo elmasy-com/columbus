@@ -1,0 +1,42 @@
+{{ define "tld" }}
+<div class="flex-none max-lg:py-5 lg:py-10 flex flex-col" id="tld_api">
+
+    <h2 class="text-3xl font-bold mx-auto">TLD API</h2>
+
+    <h3 class="text-base max-lg:py-2 lg:py-12">Returns a list of all known Top Level Domains for the given domain.
+    </h3>
+
+    <img class="pt-12 max-lg:hidden mx-auto" src="https://columbus.elmasy.com/tld.gif" alt="tld.gif" loading="lazy">
+
+    <p class="pt-2 max-lg:hidden mx-auto">This endpoint can returns 377 different Top Level Domain for google in
+        less than a second.
+    </p>
+
+    <p class="py-2">URL: <code class="text-primary">/api/tld/{domain}</code></p>
+
+    <p class="py-2">The <code class="text-primary">domain</code> parameter must be a valid Second Level Domain (eg.:
+        <code class="text-primary">example</code>).
+    </p>
+
+    <p class="py-2">Check the details and try it out in the <a class="link link-primary"
+            href="https://columbus.elmasy.com/swagger/index.html#/domain/get_api_tld__domain_">documentation</a>.
+    </p>
+
+    <p class="max-lg:hidden lg:py-6">Example:</p>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>curl "https://columbus.elmasy.com/api/tld/google"</code></pre>
+        <pre><code>["com", "hu", "co", ...]</code></pre>
+    </div>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre data-prefix=" $"><code>curl -H "Accept: text/plain" "https://columbus.elmasy.com/api/tld/google"</code>
+            </pre>
+        <pre><code>com</code></pre>
+        <pre><code>hu</code></pre>
+        <pre><code>co</code></pre>
+        <pre><code>...</code></pre>
+    </div>
+
+</div>
+{{ end }}

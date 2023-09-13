@@ -1,0 +1,46 @@
+{{ define "hero" }}
+<div class="flex-auto flex flex-col justify-center">
+
+    <img class="w-[20%] mx-auto" src="/logo.svg" alt="Logo" />
+
+    <h1 class="max-lg:text-3xl lg:text-5xl font-bold max-lg:py-3 lg:py-6 mx-auto">Columbus Project</h1>
+
+
+    <form class="max-lg:w-full lg:w-[80%] mx-auto py-12 join flex justify-center" onsubmit="return redirectSearch();"
+        id="search">
+        <input class="input input-bordered join-item input-primary w-full" type="text" id="searchDomain"
+            placeholder="Type in a domain to find it's subdomains and it's DNS records ( eg.: example.com )" />
+        <button class="btn join-item btn-primary">Search</button>
+    </form>
+
+    <script>
+        function redirectSearch() {
+            // Selecting the input element and get its value 
+            var searchDomain = document.getElementById("searchDomain").value;
+
+            window.location.href = "/search/" + searchDomain;
+            return false;
+        }
+    </script>
+
+    <div class="card max-lg:w-full lg:w-[80%] mx-auto">
+        <div class="card-body">
+            <h2 class="card-title">Columbus Project is an API-first subdomain discovery
+                service.
+                A blazingly fast subdomain enumeration service with advanced queries.</h2>
+            <p>
+                The goal of the project is to create an easy to integrate, yet powerful APIs.
+                <br>
+                There are <b class="text-primary">more than 1 billion</b> unique records are stored in the database.
+                <br>
+                Because every domain in MongoDB is indexed in the memory, Columbus can returns the result in
+                seconds.
+                <br>
+                Finding the subdomains for tesla.com took only 0.5 second for the Lookup endpoint.
+            </p>
+
+        </div>
+    </div>
+
+</div>
+{{ end }}

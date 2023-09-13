@@ -1,0 +1,44 @@
+{{ define "lookup" }}
+<div class="flex-none max-lg:py-5 lg:py-10 flex flex-col" id="lookup_api">
+
+    <h2 class="text-3xl font-bold mx-auto">Lookup API</h2>
+
+    <h3 class="text-base max-lg:py-2 lg:py-12 mx-auto">Returns the subdomains of the given domain in a JSON array or
+        a newline
+        delimetered string (to make scripting easier).</h3>
+
+    <img class="py-12 max-lg:hidden mx-auto" src="/lookup.gif" alt="Lookup API with cURL" loading="lazy">
+
+    <p class="py-2 max-lg:hidden mx-auto">Took less than a second for this endpoint to return 739 subdomains for
+        <i>tesla.com</i>.
+    </p>
+
+    <p class="py-2">URL: <code class="text-primary">/api/lookup/{domain}</code></p>
+
+    <p class="py-2">The <code class="text-primary">domain</code> parameter must be a valid domain (eg.: <code
+            class="text-primary">tesla.com</code>).</p>
+
+    <p class="py-2">The <code class="text-primary">days</code> parameter can be used to finetune the result.</p>
+
+    <p class="py-2">Check the details and try it out in the <a class="link link-primary"
+            href="/swagger/index.html#/domain/get_api_lookup__domain_">documentation</a>.
+    </p>
+
+    <p class="max-lg:hidden lg:py-6">Example:</p>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>curl "https://columbus.elmasy.com/api/lookup/tesla.com"</code></pre>
+        <pre><code>["www", "mail", "shop", ...]</code></pre>
+    </div>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre
+            data-prefix="$"><code>curl -H "Accept: text/plain" "https://columbus.elmasy.com/api/lookup/tesla.com"</code></pre>
+        <pre><code>www</code></pre>
+        <pre><code>mail</code></pre>
+        <pre><code>shop</code></pre>
+        <pre><code>...</code></pre>
+    </div>
+
+</div>
+{{ end }}

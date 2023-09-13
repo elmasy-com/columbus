@@ -1,0 +1,60 @@
+{{ define "meta" }}
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<meta name="description" content="{{ .DescriptionLong }}">
+<title>
+    {{ .DescriptionShort }}
+</title>
+
+<!-- <link href="{{ .Host }}/style.css" rel="stylesheet"> -->
+
+<link rel="canonical" href="{{ .Host }}{{ .Slug }}"/>
+<script defer data-api="/api/event" data-domain="columbus.elmasy.com" src="/js/script.js"></script>
+
+<meta property="og:title" content="{{ .DescriptionShort }}"/>
+<meta property="og:type" content="website"/>
+<meta property="og:description" content="{{ .DescriptionLong }}"/>
+<meta property="og:url" content="{{ .Host }}{{ .Slug }}" />
+<meta property="og:site_name" content="{{ .DescriptionShort }}"/>
+<meta property="og:image" content="{{ .Host }}/logo.png"/>
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="{{ .DescriptionShort }}"/>
+<meta name="twitter:description" content="{{ .DescriptionLong }}"/>
+<meta name="twitter:url" content="{{ .Host }}{{ .Slug }}"/>
+<meta name="twitter:image" content="{{ .Host }}/logo.png"/>
+
+<link rel="shortcut icon" href="{{ .Host }}/icon.svg">
+
+
+<link rel="apple-touch-icon" sizes="180x180" href="{{ .Host }}/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ .Host }}/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ .Host }}/favicon-16x16.png">
+<link rel="manifest" href="{{ .Host }}/site.webmanifest">
+
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://columbus.elmasy.com/",
+        "name": "Columbus Project - Advanced subdomain enumeration service",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://columbus.elmasy.com/search/{domain}",
+            "name": "Find subdomains and DNS records",
+            "query-input": "required name=domain"
+      }
+    }
+</script>
+
+<style>
+{{ template "stylecss" }}
+</style>
+
+{{ end }}

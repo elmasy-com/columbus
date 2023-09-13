@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/elmasy-com/columbus/frontend"
 	"github.com/elmasy-com/columbus/server/config"
 	"github.com/elmasy-com/columbus/server/server/history"
 	"github.com/elmasy-com/columbus/server/server/lookup"
@@ -54,20 +55,22 @@ func Run() error {
 	router.Use(gin.LoggerWithFormatter(GinLog))
 	router.Use(gin.Recovery())
 
+	router.NoRoute(frontend.GetStatic)
+
 	router.SetTrustedProxies(config.TrustedProxies)
+
+	router.GET("/", frontend.GetIndex)
 
 	router.GET("/api/lookup/:domain", lookup.GetApiLookup)
 	router.GET("/api/starts/:domain", lookup.GetApiStarts)
 	router.GET("/api/tld/:domain", lookup.GetApiTLD)
 	router.GET("/api/history/:domain", history.GetApiHistory)
 
-	// router.PUT("/insert/:domain", InsertPut)
-
 	router.GET("/api/stat", stat.GetApiStat)
-	router.GET("/stat", stat.GetStat)
+	// TODO: router.GET("/stat", stat.GetStat)
 
-	router.GET("/search", search.GetSearch)
-	router.GET("/search/:domain", search.GetSearchResult)
+	router.GET("/search", search.GetSearchRedirect)
+	router.GET("/search/:domain", search.GetSearch)
 
 	router.GET("/api/tools/tld/:fqdn", ToolsTLDGet)
 	router.GET("/api/tools/domain/:fqdn", ToolsDomainGet)
@@ -83,6 +86,8 @@ func Run() error {
 	router.GET("/tools/domain/:fqdn", Redirect)
 	router.GET("/tools/subdomain/:fqdn", Redirect)
 	router.GET("/tools/isvalid/:fqdn", Redirect)
+
+	router.GET("/sitemap.xml", frontend.GetSitemapXML)
 
 	srv := &http.Server{
 		Addr:    config.Address,

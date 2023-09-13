@@ -1,0 +1,42 @@
+{{ define "history" }}
+<div class="flex-none max-lg:py-5 lg:py-10 flex flex-col" id="history_api">
+
+    <h2 class="text-3xl font-bold mx-auto">History API</h2>
+
+    <h3 class="text-base max-lg:py-2 lg:py-12 mx-auto">Returns the DNS history of the given domain.</h3>
+
+    <p class="py-2">Columbus finds and stores the DNS records (eg.: A and AAAA) in the database to be used as a
+        domain history tool.
+        If a known record found, updates the <code class="text-primary">time</code> field to the current time in
+        unix timestamp.
+        If a new record found, appends to the records history.</p>
+
+    <p class="font-bold">Note: this is an EXPERIMENTAL FEATURE!</p>
+
+
+    <img class="py-12 max-lg:hidden mx-auto" src="/history.gif" alt="History API with cURL" loading="lazy">
+
+    <p class="py-2 max-lg:hidden mx-auto">This endpoint will store every DNS record of "<i>columbus.elmasy.com</i>"
+        and returns it is seconds.
+    </p>
+
+    <p class="py-2">URL: <code class="text-primary">/api/history/{domain}</code></p>
+
+    <p class="py-2">The <code class="text-primary">domain</code> parameter must be a valid domain (eg.: <code
+            class="text-primary">tesla.com</code>).</p>
+
+    <p class="py-2">The <code class="text-primary">days</code> parameter can be used to finetune the result.</p>
+
+    <p class="py-2">Check the details and try it out in the <a class="link link-primary"
+            href="/swagger/index.html#/domain/get_api_history__domain_">documentation</a>.
+    </p>
+
+    <p class="max-lg:hidden lg:py-6">Example:</p>
+
+    <div class="w-full mockup-code mx-auto my-4 max-lg:hidden shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>curl "https://columbus.elmasy.com/api/history/columbus.elmasy.com"</code></pre>
+        <pre><code>[{"type":1,"value":"142.132.164.231","time":1689723813},{"type":28,"value":"2a01:4f8:1c1e:eddd::1","time":1689723813}]</code></pre>
+    </div>
+
+</div>
+{{ end }}

@@ -1,0 +1,77 @@
+{{ define "index" }}
+<!doctype html>
+<html lang="en-US">
+
+<head>
+
+    {{ template "meta" .Meta }}
+
+</head>
+
+<body class="bg-base-100 max-w-[90%] lg:max-w-[80%] xl:max-w-[60%] 2xl:max-w-[40%] m-auto">
+
+    <div class="min-h-screen flex flex-col">
+
+        <!-- Header-->
+        {{ template "header" }}
+
+        <!-- Hero -->
+        {{ template "hero" }}
+
+        <!-- Divider -->
+        {{ template "divider" "statistics" }}
+
+    </div>
+
+    <!-- Statistics -->
+    {{ template "statistics" .Statistics }}
+
+    <!-- Divider -->
+    {{ template "divider" "lookup_api" }}
+
+    <!-- Lookup API -->
+    {{ template "lookup" }}
+
+    <!-- Divider -->
+    {{ template "divider" "history_api" }}
+
+    <!-- History API -->
+    {{ template "history" }}
+
+    <!-- Divider -->
+    {{ template "divider" "starts_api" }}
+
+    <!-- Starts API -->
+    {{ template "starts" }}
+
+    <!-- Divider -->
+    {{ template "divider" "tld_api" }}
+
+    <!-- TLD API -->
+    {{ template "tld" }}
+
+    <!-- Divider -->
+    {{ template "divider" "dns_server" }}
+
+    <!-- DNS Server -->
+    {{ template "dnsserver" }}
+
+    <!-- Divider -->
+    {{ template "divider" "privacy_policy" }}
+
+    <!-- Privacy Policy -->
+    {{ template "privacypolicy" }}
+
+    <!-- Divider -->
+    {{ template "divider" "contact" }}
+
+    <!-- Contact -->
+    {{ template "contact" }}
+
+    <!-- Divider -->
+    {{ template "divider" }}
+
+</body>
+
+</html>
+{{ end }}

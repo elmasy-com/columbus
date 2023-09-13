@@ -1,0 +1,99 @@
+{{ define "statistics" }}
+<div class="flex-none max-lg:py-5 lg:py-10 flex flex-col" id="statistics">
+
+    <h2 class="text-3xl font-bold mx-auto">Statistics</h2>
+
+    <h3 class="text-base max-lg:py-2 lg:py-12 mx-auto">
+        Latest Database and Scanner statistics.
+    </h3>
+
+    <div class="stats  mx-auto">
+        <div class="stat">
+            <div class="stat-title">Statistics updated</div>
+            <div class="stat-value">{{ .Since }} ago</div>
+            <div class="stat-desc">{{ .Date }}</div>
+        </div>
+
+    </div>
+    <div class="join join-vertical max-lg:w-full lg:w-[80%] mx-auto">
+        <div class="stats stats-vertical lg:stats-horizontal join-item w-full place-items-center">
+
+            <div class="stat place-items-center lg:w-[50%] border-none">
+                <div class="stat-title">Total</div>
+                <div class="stat-value">{{ .Total }}</div>
+                <div class="stat-desc">Number of unique domains</div>
+            </div>
+
+            <div class="stat place-items-center lg:w-[50%] border-none">
+                <div class="stat-title">Update domains</div>
+                <div class="stat-value">{{ .Updated }}</div>
+                <div class="stat-desc">{{ .UpdatedPercent }} of the total</div>
+            </div>
+        </div>
+
+        <div class="stats stats-vertical lg:stats-horizontal  join-item w-full place-items-center">
+
+            <div class="stat place-items-center lg:w-[50%] border-none">
+                <div class="stat-title">Domains with valid record</div>
+                <div class="stat-value">{{ .Valid }}</div>
+                <div class="stat-desc">{{ .ValidPercent }} of the total</div>
+            </div>
+
+            <div class="stat place-items-center lg:w-[50%] border-none">
+                <div class="stat-title">Certificate Transparency Logs</div>
+                <div class="stat-value">{{ .CTTotal }}</div>
+                <div class="stat-desc">parsed</div>
+            </div>
+
+        </div>
+    </div>
+
+    <h3 class="text-2xl max-lg:py-6 lg:py-12 mx-auto">
+        Certificate Transparency Logs
+    </h3>
+
+    <div class="overflow-x-auto">
+        <table class="table justify-center align-middle items-center">
+            <!-- head -->
+            <thead class="justify-center align-middle items-center">
+                <tr class="border-accent text-center">
+                    <th class="font-bold lg:text-lg text-accent">Name</th>
+                    <th class="font-bold lg:text-lg text-accent">Index</th>
+                    <th class="font-bold lg:text-lg text-accent">Remaining</th>
+                    <th class="max-lg:hidden font-bold lg:text-lg text-accent">Progress</th>
+                </tr>
+            </thead>
+            <tbody class="justify-center align-middle items-center">
+                {{ range .CTLogs }}
+                <tr class="border-accent text-center">
+                    <td class="lg:text-lg text-primary">{{ .Name }}</td>
+                    <td>
+                        <div class="max-lg:text-base lg:text-lg text-white">{{ .Index }}</div>
+                        <div class="max-lg:text-xs lg:text-sm">of {{ .Size }}</div>
+                    </td>
+                    <td class="lg:text-lg">{{ .Remaining }}</td>
+
+                    <td class="max-lg:hidden">
+                        {{ if gt .CompletePercent 100.0 }}
+                        <progress class="progress progress-success w-full" value="100" max="100"></progress>
+                        {{ else if gt .CompletePercent 95.0 }}
+                        <progress class="progress progress-success w-full" value="{{ .CompletePercent }}"
+                            max="100"></progress>
+                        {{ else if gt .CompletePercent 50.0 }}
+                        <progress class="progress progress-warning w-full" value="{{ .CompletePercent }}"
+                            max="100"></progress>
+                        {{ else }}
+                        <progress class="progress progress-error w-full" value="{{ .CompletePercent }}"
+                            max="100"></progress>
+                        {{ end }}
+                    </td>
+                </tr>
+                {{ end }}
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+{{ end }}

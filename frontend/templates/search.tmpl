@@ -1,0 +1,104 @@
+{{ define "search" }}
+<!doctype html>
+<html lang="en-US">
+
+<head>
+
+    {{ template "meta" .Meta }}
+
+</head>
+
+<body class="bg-base-100 max-w-[90%] lg:max-w-[80%] xl:max-w-[60%] 2xl:max-w-[40%] m-auto">
+
+    <div class="flex flex-col">
+
+        <!-- Header-->
+        {{ template "header" }}
+
+        <div class="flex-auto flex flex-col justify-center">
+
+
+            <h1 class="max-lg:text-3xl lg:text-5xl max-lg:pt-20 lg:pt-32 mx-auto">
+                Domain informations of <b class="text-primary">{{ .Question }}</b>
+            </h1>
+
+            <div class="stats stats-vertical lg:stats-horizontal max-lg:pt-10 lg:pt-16">
+
+                <div class="stat place-items-center">
+                    <div class="stat-title">Total Subdomains</div>
+                    <div class="stat-value">{{ .Stat.Total }}</div>
+                </div>
+
+                <div class="stat place-items-center">
+                    <div class="stat-title">With Records</div>
+                    <div class="stat-value">{{ .Stat.WithRecords }}</div>
+                    <div class="stat-desc">
+                        {{ .Stat.WithRecords }}/{{ .Stat.Total }} ({{.Stat.WithRecordsPercent }}%)</div>
+                </div>
+
+                <div class="stat place-items-center">
+                    <div class="stat-title">Total Records</div>
+                    <div class="stat-value">{{ .Stat.TotalRecords }}</div>
+                </div>
+
+            </div>
+
+        </div>
+
+        {{ range .Domains }}
+
+
+        <h2 class="max-lg:text-xl lg:text-2xl max-lg:pt-10 lg:pt-16 px-2">
+            <b class="text-primary">-></b> <b>{{ .Domain}}</b>
+        </h2>
+        <div class="overflow-x-auto  max-lg:pt-5 lg:pt-8">
+            <table class="table text-center">
+                <!-- head -->
+                <thead>
+                    <tr class="border-b-accent">
+                        <th class="text-primary text-lg">Type</th>
+                        <th class="text-primary text-lg">Value</th>
+                        <th class="text-primary text-lg">Last Seen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Records }}
+                    <tr class="border-b-accent">
+                        <td>{{ .Type }}</td>
+                        <td class="break-all">{{ .Value }}</td>
+                        <td>{{ .Time }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        {{ end }}
+
+
+
+        {{ if .Unknowns }}
+
+        <h2 class="max-lg:text-xl lg:text-2xl max-lg:pt-10 lg:pt-16 px-2">Domains without known DNS record
+        </h2>
+
+        <ul class="block px-2 py-7">
+
+            {{ range .Unknowns }}
+            <li style="display: inline;">{{ . }}</li>
+            {{ end }}
+
+        </ul>
+
+
+        {{ end }}
+
+    </div>
+
+
+    {{ template "divider" }}
+
+</body>
+
+</html>
+{{ end }}
