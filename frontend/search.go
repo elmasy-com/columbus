@@ -2,11 +2,8 @@ package frontend
 
 import (
 	"bytes"
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,14 +52,8 @@ func GetSearchHtml(c *gin.Context, dat SearchData) {
 		return
 	}
 
-	// Set ETag
-	etag := md5.Sum(buf.Bytes())
-	c.Header("etag", hex.EncodeToString(etag[:]))
-	c.Header("vary", "Accept")
-
 	// Cache for an hour
-	c.Header("cache-control", "public, max-age=3600")
-	c.Header("expires", time.Now().In(time.UTC).Add(3600*time.Second).Format(time.RFC1123))
+	c.Header("X-Accel-Expire", "3600")
 
 	c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
 }

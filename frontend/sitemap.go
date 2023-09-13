@@ -2,14 +2,11 @@ package frontend
 
 import (
 	"bytes"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -92,14 +89,8 @@ func GetSitemapXML(c *gin.Context) {
 		return
 	}
 
-	// Set ETag
-	etag := md5.Sum(buf.Bytes())
-	c.Header("etag", hex.EncodeToString(etag[:]))
-	c.Header("vary", "Accept")
-
-	// Cache for a day
-	c.Header("cache-control", "public, max-age=86400")
-	c.Header("expires", time.Now().In(time.UTC).Add(86400*time.Second).Format(time.RFC1123))
+	// Cache for an hour
+	c.Header("X-Accel-Expire", "86400")
 
 	c.Data(http.StatusOK, "application/xml", []byte(html.UnescapeString(buf.String())))
 }

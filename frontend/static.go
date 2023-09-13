@@ -1,15 +1,12 @@
 package frontend
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"mime"
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -64,18 +61,12 @@ func GetStatic(c *gin.Context) {
 		contentType = "application/octet-stream"
 	}
 
-	etag := md5.Sum(content)
-	c.Header("etag", hex.EncodeToString(etag[:]))
-	c.Header("vary", "Accept")
-
 	if isImage(extension) {
 		// Cache images for a week
-		c.Header("cache-control", "public, max-age=604800")
-		c.Header("expires", time.Now().In(time.UTC).Add(604800*time.Second).Format(time.RFC1123))
+		c.Header("X-Accel-Expire", "604800")
 	} else {
 		// Cache static files for a day
-		c.Header("cache-control", "public, max-age=86400")
-		c.Header("expires", time.Now().In(time.UTC).Add(86400*time.Second).Format(time.RFC1123))
+		c.Header("X-Accel-Expire", "86400")
 	}
 
 	c.Data(http.StatusOK, contentType, content)

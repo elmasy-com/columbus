@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/elmasy-com/columbus/db"
 	"github.com/elmasy-com/columbus/fault"
@@ -98,10 +97,7 @@ func GetApiHistory(c *gin.Context) {
 		hs = append(hs, History{Domain: doms[i].String(), Records: doms[i].Records})
 	}
 
-	// Cache for 10 minutes
-	c.Header("cache-control", "public, max-age=600")
-	c.Header("expires", time.Now().In(time.UTC).Add(600*time.Second).Format(time.RFC1123))
-	c.Header("vary", "Accept")
+	c.Header("X-Accel-Expire", "600")
 
 	c.JSON(http.StatusOK, hs)
 

@@ -211,10 +211,7 @@ func GetApiStarts(c *gin.Context) {
 		return
 	}
 
-	// Cache for 10 minutes
-	c.Header("cache-control", "public, max-age=600")
-	c.Header("expires", time.Now().In(time.UTC).Add(600*time.Second).Format(time.RFC1123))
-	c.Header("vary", "Accept")
+	c.Header("X-Accel-Expire", "600")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, strings.Join(domains, "\n"))
