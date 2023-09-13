@@ -19,7 +19,7 @@ import (
 
 func GetSearchRedirect(c *gin.Context) {
 
-	c.Redirect(http.StatusTemporaryRedirect, "/#search")
+	c.Redirect(http.StatusFound, "/#search")
 }
 
 func GetSearch(c *gin.Context) {
@@ -33,7 +33,7 @@ func GetSearch(c *gin.Context) {
 	// Redirect client to the base domain if FQDN used (eg.: /search/www.example.com -> /search/example.com)
 	if validator.Domain(d) && dns.HasSub(d) {
 		c.Header("location", fmt.Sprintf("/search/%s", dns.GetDomain(d)))
-		c.Status(http.StatusMovedPermanently)
+		c.Status(http.StatusFound)
 		return
 	}
 
