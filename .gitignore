@@ -1,4 +1,5 @@
 /release
 /internal
 /frontend/style.css
+/frontend/templates/stylecss.tmpl
 /frontend/node_modules
