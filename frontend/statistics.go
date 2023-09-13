@@ -32,7 +32,7 @@ type historyStat struct {
 
 type statistics struct {
 	Date           string
-	Since          string
+	Time           string
 	Total          string
 	Updated        string
 	UpdatedPercent string
@@ -55,9 +55,11 @@ func parseStatistic() (statistics, error) {
 
 	var stat statistics
 
+	updated := time.Unix(s[0].Date, 0).UTC()
+
 	// The first element in the slice is the newest entry
-	stat.Date = time.Unix(s[0].Date, 0).In(time.UTC).String()
-	stat.Since = time.Since(time.Unix(s[0].Date, 0)).Round(time.Second).String()
+	stat.Date = updated.Format("2006-01-02")
+	stat.Time = updated.Format("15:04:05")
 	stat.Total = printer.Sprint(s[0].Total)
 	stat.Updated = printer.Sprint(s[0].Updated)
 	stat.UpdatedPercent = fmt.Sprintf("%.2f%%", float64(s[0].Updated)/float64(s[0].Total)*100)
