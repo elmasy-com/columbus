@@ -249,7 +249,7 @@ systemctl enable columbus-dns
 
 ## Frontend
 
-Static site using [Hugo](https://gohugo.io/) and [Introduction theme](https://github.com/victoriadrake/hugo-theme-introduction).
+HTML + [tailwindcss](https://tailwindcss.com/) + [DaisyUI](https://daisyui.com/). The style is inspired by [Introduction theme](https://github.com/victoriadrake/hugo-theme-introduction).
 
 ## VHS
 
