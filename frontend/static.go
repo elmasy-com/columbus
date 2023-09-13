@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -63,10 +64,12 @@ func GetStatic(c *gin.Context) {
 
 	if isImage(extension) {
 		// Cache images for a week
-		c.Header("X-Accel-Expires", "604800")
+		c.Header("cache-control", "public, max-age=604800")
+		c.Header("expires", time.Now().UTC().Add(604800*time.Second).Format(time.RFC1123))
 	} else {
-		// Cache static files for a day
-		c.Header("X-Accel-Expires", "86400")
+		// Cache others for a day
+		c.Header("cache-control", "public, max-age=86400")
+		c.Header("expires", time.Now().UTC().Add(86400*time.Second).Format(time.RFC1123))
 	}
 
 	c.Data(http.StatusOK, contentType, content)

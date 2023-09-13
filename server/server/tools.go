@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/elmasy-com/columbus/fault"
 	"github.com/elmasy-com/elnet/dns"
@@ -38,7 +39,10 @@ func ToolsTLDGet(c *gin.Context) {
 		return
 	}
 
-	c.Header("X-Accel-Expires", "600")
+	// Cache for 60 minutes.
+	c.Header("cache-control", "public, max-age=600")
+	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
+	c.Header("vary", "Accept")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, d)
@@ -76,7 +80,10 @@ func ToolsDomainGet(c *gin.Context) {
 		return
 	}
 
-	c.Header("X-Accel-Expires", "600")
+	// Cache for 60 minutes.
+	c.Header("cache-control", "public, max-age=600")
+	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
+	c.Header("vary", "Accept")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, d)
@@ -114,7 +121,10 @@ func ToolsSubdomainGet(c *gin.Context) {
 		return
 	}
 
-	c.Header("X-Accel-Expires", "600")
+	// Cache for 60 minutes.
+	c.Header("cache-control", "public, max-age=600")
+	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
+	c.Header("vary", "Accept")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, d)
@@ -130,7 +140,10 @@ func ToolsIsValidGet(c *gin.Context) {
 	fqdn := c.Param("fqdn")
 	fqdn = dns.Clean(fqdn)
 
-	c.Header("X-Accel-Expires", "600")
+	// Cache for 60 minutes.
+	c.Header("cache-control", "public, max-age=600")
+	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
+	c.Header("vary", "Accept")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, fmt.Sprintf("%v", dns.IsValid(fqdn)))

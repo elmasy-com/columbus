@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/elmasy-com/columbus/db"
 	"github.com/elmasy-com/columbus/fault"
@@ -98,7 +99,10 @@ func GetApiLookup(c *gin.Context) {
 		c.Error(fmt.Errorf("failed to insert topList: %w", err))
 	}
 
-	c.Header("X-Accel-Expires", "600")
+	// Cache for 10 minutes.
+	c.Header("cache-control", "public, max-age=600")
+	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
+	c.Header("vary", "Accept")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, strings.Join(subs, "\n"))
@@ -148,7 +152,10 @@ func GetApiTLD(c *gin.Context) {
 		return
 	}
 
-	c.Header("X-Accel-Expires", "600")
+	// Cache for 10 minutes.
+	c.Header("cache-control", "public, max-age=600")
+	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
+	c.Header("vary", "Accept")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, strings.Join(tlds, "\n"))
@@ -204,7 +211,10 @@ func GetApiStarts(c *gin.Context) {
 		return
 	}
 
-	c.Header("X-Accel-Expires", "600")
+	// Cache for 10 minutes.
+	c.Header("cache-control", "public, max-age=600")
+	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
+	c.Header("vary", "Accept")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, strings.Join(domains, "\n"))

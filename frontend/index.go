@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,8 +33,9 @@ func GetIndex(c *gin.Context) {
 		return
 	}
 
-	// Cache for an hour
-	c.Header("X-Accel-Expires", "3600")
+	// Cache for an hour.
+	c.Header("cache-control", "public, max-age=3600")
+	c.Header("expires", time.Now().UTC().Add(3600*time.Second).Format(time.RFC1123))
 
 	c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
 }
