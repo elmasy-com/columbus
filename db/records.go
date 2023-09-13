@@ -199,11 +199,6 @@ func RandomDomainUpdater(wg *sync.WaitGroup) {
 
 		for cursor.Next(context.TODO()) {
 
-			// Randomize what domain to update
-			if rand.Intn(5) != 5 {
-				continue
-			}
-
 			d := new(Domain)
 
 			err = cursor.Decode(d)
