@@ -109,15 +109,6 @@
         <priority>0.8</priority>
    </url>
    
-
-   
-    
-    
-
-
-
-
-
     <url>
         <loc>https://columbus.elmasy.com/search/vng.nl</loc>
         <changefreq>hourly</changefreq>
@@ -160,9 +151,7 @@
         <changefreq>hourly</changefreq>
         <priority>0.8</priority>
    </url>
-   
-
-   
+      
     <url>
         <loc>https://columbus.elmasy.com/search/orderwindstream.com</loc>
         <changefreq>hourly</changefreq>
