@@ -28,11 +28,17 @@ func GetSearch(c *gin.Context) {
 	var doms []string
 
 	// Parse domain param
-	d := dns.Clean(c.Param("domain"))
+	d := c.Param("domain")
 
 	// Redirect client to the base domain if FQDN used (eg.: /search/www.example.com -> /search/example.com)
 	if validator.Domain(d) && dns.HasSub(d) {
 		c.Header("location", fmt.Sprintf("/search/%s", dns.GetDomain(d)))
+		c.Status(http.StatusFound)
+		return
+	}
+
+	if d != dns.Clean(d) {
+		c.Header("location", fmt.Sprintf("/search/%s", dns.Clean(d)))
 		c.Status(http.StatusFound)
 		return
 	}
