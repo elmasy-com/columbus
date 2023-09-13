@@ -211,7 +211,7 @@ func GetApiStarts(c *gin.Context) {
 		return
 	}
 
-	c.Header("X-Accel-Expire", "600")
+	c.Header("X-Accel-Expires", "600")
 
 	if c.GetHeader("Accept") == "text/plain" {
 		c.String(http.StatusOK, strings.Join(domains, "\n"))

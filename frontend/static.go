@@ -63,10 +63,10 @@ func GetStatic(c *gin.Context) {
 
 	if isImage(extension) {
 		// Cache images for a week
-		c.Header("X-Accel-Expire", "604800")
+		c.Header("X-Accel-Expires", "604800")
 	} else {
 		// Cache static files for a day
-		c.Header("X-Accel-Expire", "86400")
+		c.Header("X-Accel-Expires", "86400")
 	}
 
 	c.Data(http.StatusOK, contentType, content)

@@ -33,7 +33,7 @@ func GetIndex(c *gin.Context) {
 	}
 
 	// Cache for an hour
-	c.Header("X-Accel-Expire", "3600")
+	c.Header("X-Accel-Expires", "3600")
 
 	c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
 }

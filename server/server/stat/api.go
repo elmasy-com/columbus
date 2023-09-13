@@ -17,7 +17,7 @@ func GetApiStat(c *gin.Context) {
 		return
 	}
 
-	c.Header("X-Accel-Expire", "600")
+	c.Header("X-Accel-Expires", "600")
 
 	c.JSON(http.StatusOK, s)
 }

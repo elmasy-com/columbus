@@ -97,7 +97,7 @@ func GetApiHistory(c *gin.Context) {
 		hs = append(hs, History{Domain: doms[i].String(), Records: doms[i].Records})
 	}
 
-	c.Header("X-Accel-Expire", "600")
+	c.Header("X-Accel-Expires", "600")
 
 	c.JSON(http.StatusOK, hs)
 

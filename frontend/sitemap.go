@@ -90,7 +90,7 @@ func GetSitemapXML(c *gin.Context) {
 	}
 
 	// Cache for an hour
-	c.Header("X-Accel-Expire", "86400")
+	c.Header("X-Accel-Expires", "86400")
 
 	c.Data(http.StatusOK, "application/xml", []byte(html.UnescapeString(buf.String())))
 }
