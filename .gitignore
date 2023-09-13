@@ -1,4 +1,4 @@
 /release
 /internal
-/frontend/.hugo_build.lock
-/frontend/public
+/frontend/style.css
+/frontend/node_modules
