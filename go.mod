@@ -4,9 +4,10 @@ go 1.19
 
 require (
 	github.com/elmasy-com/elnet v0.0.0-20230823204247-b56e13a02a28
-	github.com/elmasy-com/slices v0.0.0-20230712174526-6eb4e5e38b73
+	github.com/elmasy-com/slices v0.0.0-20230919000417-87219f95e1d1
 	github.com/g0rbe/slitu v1.0.6
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-echarts/go-echarts/v2 v2.2.7
 	github.com/miekg/dns v1.1.56
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/text v0.13.0
@@ -27,8 +28,9 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/certificate-transparency-go v1.1.6 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.7 // indirect
+	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
+	github.com/kr/text v0.1.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
