@@ -1,0 +1,29 @@
+@font-face {
+    font-family: 'Roboto Mono', monospace;
+    src:
+        local('Roboto Mono'),
+        url('/font/RobotoMono/Bold.ttf') format('truetype'),
+        url('/font/RobotoMono/BoldItalic.ttf') format('truetype'),
+        url('/font/RobotoMono/ExtraLight.ttf') format('truetype'),
+        url('/font/RobotoMono/ExtraLightItalic.ttf') format('truetype'),
+        url('/font/RobotoMono/Italic-VariableFont_wght.ttf') format('truetype'),
+        url('/font/RobotoMono/Italic.ttf') format('truetype'),
+        url('/font/RobotoMono/Light.ttf') format('truetype'),
+        url('/font/RobotoMono/LightItalic.ttf') format('truetype'),
+        url('/font/RobotoMono/Medium.ttf') format('truetype'),
+        url('/font/RobotoMono/MediumItalic.ttf') format('truetype'),
+        url('/font/RobotoMono/Regular.ttf') format('truetype'),
+        url('/font/RobotoMono/SemiBold.ttf') format('truetype'),
+        url('/font/RobotoMono/SemiBoldItalic.ttf') format('truetype'),
+        url('/font/RobotoMono/Thin.ttf') format('truetype'),
+        url('/font/RobotoMono/ThinItalic.ttf') format('truetype'),
+        url('/font/RobotoMono/VariableFont_wght.ttf') format('truetype');
+}
+
+html {
+    font-family: 'Roboto Mono', monospace;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

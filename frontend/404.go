@@ -11,12 +11,9 @@ import (
 
 type http404Data struct {
 	Meta   metaData
+	Hero   heroData
 	Method string
 	Domain string
-}
-
-func Get404Code(c *gin.Context) {
-	c.Status(http.StatusNotFound)
 }
 
 func Get404Text(c *gin.Context) {
@@ -31,18 +28,22 @@ func Get404HTML(c *gin.Context, d string) {
 
 	buf := new(bytes.Buffer)
 
-	ds := ""
-	if d == "" {
-		ds = "Columbus Project - 404 Not Found"
-	} else {
-		ds = "Columbus Project - No subdomain for " + d
+	title := "404 Not Found"
+	subtitle := c.Request.Method + " " + c.Request.URL.Path
+	if d != "" {
+		subtitle = "No subdomain for " + d
 	}
 
-	dat := http404Data{Meta: getMetaData(c.Request, ds, DescriptionLong), Method: c.Request.Method, Domain: d}
+	dat := http404Data{
+		Meta:   getMetaData(c.Request, "Columbus Project - "+title, DefaultDescription),
+		Hero:   getHeroData("404 Not Found", subtitle),
+		Method: c.Request.Method,
+		Domain: d,
+	}
 
 	err := templates.ExecuteTemplate(buf, "404", dat)
 	if err != nil {
-		c.Error(fmt.Errorf("failed to render 404.html: %w", err))
+		c.Error(fmt.Errorf("failed to render 404: %w", err))
 		Get500(c)
 		return
 	}

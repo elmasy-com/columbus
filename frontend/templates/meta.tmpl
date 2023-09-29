@@ -5,37 +5,35 @@
 <meta name="referrer" content="no-referrer">
 <meta name="author" content="g0rbe"> 
 
-<meta name="description" content="{{ .DescriptionLong }}">
+<meta name="description" content="{{ .Description }}">
 <title>
-    {{ .DescriptionShort }}
+    {{ .Title }}
 </title>
 
-<!-- <link href="{{ .Host }}/style.css" rel="stylesheet"> -->
-
-<link rel="canonical" href="{{ .Host }}{{ .Slug }}"/>
+<link rel="canonical" href="{{ .Proto }}://{{ .Host }}{{ .Slug }}"/>
 <script defer data-api="/api/event" data-domain="columbus.elmasy.com" src="/js/script.js"></script>
 
-<meta property="og:title" content="{{ .DescriptionShort }}"/>
+<meta property="og:title" content="{{ .Title }}"/>
 <meta property="og:type" content="website"/>
-<meta property="og:description" content="{{ .DescriptionLong }}"/>
-<meta property="og:url" content="{{ .Host }}{{ .Slug }}" />
-<meta property="og:site_name" content="{{ .DescriptionShort }}"/>
-<meta property="og:image" content="{{ .Host }}/cover.png"/>
+<meta property="og:description" content="{{ .Description }}"/>
+<meta property="og:url" content="{{ .Proto }}://{{ .Host }}{{ .Slug }}" />
+<meta property="og:site_name" content="{{ .Host }}"/>
+<meta property="og:image" content="{{ .Proto }}://{{ .Host }}/cover.png"/>
 
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="{{ .DescriptionShort }}"/>
-<meta name="twitter:description" content="{{ .DescriptionLong }}"/>
-<meta name="twitter:url" content="{{ .Host }}{{ .Slug }}"/>
-<meta name="twitter:image" content="{{ .Host }}/cover.png"/>
+<meta name="twitter:title" content="{{ .Title }}"/>
+<meta name="twitter:description" content="{{ .Description }}"/>
+<meta name="twitter:url" content="{{ .Proto }}://{{ .Host }}{{ .Slug }}"/>
+<meta name="twitter:image" content="{{ .Proto }}://{{ .Host }}/cover.png"/>
 
-<link rel="shortcut icon" href="{{ .Host }}/icon.svg">
+<link rel="shortcut icon" href="{{ .Proto }}://{{ .Host }}/icon.svg">
 
 
-<link rel="apple-touch-icon" sizes="180x180" href="{{ .Host }}/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ .Host }}/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="{{ .Host }}/favicon-16x16.png">
-<link rel="manifest" href="{{ .Host }}/site.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ .Proto }}://{{ .Host }}/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ .Proto }}://{{ .Host }}/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ .Proto }}://{{ .Host }}/favicon-16x16.png">
+<link rel="manifest" href="{{ .Proto }}://{{ .Host }}/site.webmanifest">
 
 <script type="application/ld+json">
     {

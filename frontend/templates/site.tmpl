@@ -1,0 +1,27 @@
+{{ define "site-start" }}
+<!doctype html>
+<html lang="en-US">
+
+<head>
+    {{ template "meta" .Meta }}
+</head>
+
+<body class="bg-secondary md:max-w-[100%] lg:max-w-[80%] xl:max-w-[60%] xl:max-w-[40%] mx-auto min-h-screen flex flex-col">
+
+    {{ template "navbar" . }}
+
+    {{ template "breadcrumbs" . }}
+
+    <div class="flex-auto flex flex-col justify-center content-center items-center">
+
+{{ end }}
+
+
+
+{{ define "site-end" }}
+    </div>
+
+</body>
+
+</html>
+{{ end }}

@@ -1,45 +1,16 @@
 {{ define "hero" }}
-<div class="flex-auto flex flex-col justify-center">
+<div class="max-w-[90%] flex max-md:flex-col items-center">
 
-    <img class="w-[20%] mx-auto" src="/logo.svg" alt="Logo" />
+    <img class="h-[12rem] w-[12rem]" src="/logo.svg" alt="Logo"></img>
 
-    <h1 class="max-lg:text-3xl lg:text-5xl font-bold max-lg:py-3 lg:py-6 mx-auto">Columbus Project</h1>
+    <div class="md:mx-2"></div>
 
-
-    <form class="max-lg:w-full lg:w-[80%] mx-auto py-12 join flex justify-center" onsubmit="return redirectSearch();"
-        id="search">
-        <input class="input input-bordered join-item input-primary w-full" type="text" id="searchDomain"
-            placeholder="Type in a domain to find it's subdomains and it's DNS records ( eg.: example.com )" />
-        <button class="btn join-item btn-primary">Search</button>
-    </form>
-
-    <script>
-        function redirectSearch() {
-            // Selecting the input element and get its value 
-            var searchDomain = document.getElementById("searchDomain").value;
-
-            window.location.href = "/search/" + searchDomain;
-            return false;
-        }
-    </script>
-
-    <div class="card max-lg:w-full lg:w-[80%] mx-auto">
-        <div class="card-body">
-            <h2 class="card-title">Columbus Project is an API-first subdomain discovery
-                service.
-                A blazingly fast subdomain enumeration service with advanced queries.</h2>
-            <p>
-                The goal of the project is to create an easy to integrate, yet powerful APIs.
-                <br>
-                There are <b class="text-primary">more than 1 billion</b> unique records are stored in the database.
-                <br>
-                Because every domain in MongoDB is indexed in the memory, Columbus can returns the result in
-                seconds.
-                <br>
-                Finding the subdomains for tesla.com took only 0.5 second for the Lookup endpoint.
-            </p>
-
-        </div>
+    <div class="flex flex-col justify-center max-md:content-center md:content-start max-md:items-center md:items-start">
+        <h1 class="max-lg:text-2xl lg:text-3xl font-bold">{{ .Title }}</h1>
+        <!-- See break: https://developer.mozilla.org/en-US/docs/Web/CSS/word-break -->
+        <h2 class="max-lg:text-base lg:text-xl" style="word-break: break-word;">
+            {{ .Subtitle }}
+        </h2>
     </div>
 
 </div>

@@ -3,40 +3,62 @@ package frontend
 import (
 	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/elmasy-com/slices"
 )
 
 const (
-	DescriptionShort = "Columbus Project - A fast, API-first subdomain discovery service with advanced queries."
-	DescriptionLong  = "Columbus Project is an API-first subdomain discovery service. A blazingly fast subdomain enumeration service with advanced queries."
+	DefaultTitle       = "A fast, API-first subdomain discovery service with advanced queries."
+	DefaultDescription = "Columbus Project is an API-first subdomain discovery service. A blazingly fast subdomain enumeration service with advanced queries."
 )
 
 type metaData struct {
-	Host             string
-	Slug             string
-	DescriptionShort string
-	DescriptionLong  string
+	Proto       string
+	Host        string
+	Slug        string
+	SlugParts   []string
+	Title       string
+	Description string
 }
 
-func getMetaData(r *http.Request, ds string, dl string) metaData {
+// BaseURL return the base URL (eg.: "https://example.com")
+func (m *metaData) BaseURL() string {
+	return fmt.Sprintf("%s://%s", m.Proto, m.Host)
+}
 
-	proto := r.Header.Get("X-Forwarded-Proto")
-	if proto == "" {
+// CreateURL create an URL from the base url and slug s.
+// (eg.: "https://example.com/slug")
+func (m *metaData) CreateURL(s string) string {
+	return fmt.Sprintf("%s://%s%s", m.Proto, m.Host, s)
+}
 
-		proto = r.URL.Scheme
-		if proto == "" {
-			proto = "http"
+func getMetaData(r *http.Request, title string, description string) metaData {
+
+	dat := metaData{}
+
+	dat.Proto = r.Header.Get("X-Forwarded-Proto")
+	if dat.Proto == "" {
+
+		dat.Proto = r.URL.Scheme
+		if dat.Proto == "" {
+			dat.Proto = "http"
 		}
 	}
 
-	host := r.Host
-	if host == "" {
-		host = "unknown"
+	dat.Host = r.Host
+	if dat.Host == "" {
+		dat.Host = "unknown"
 	}
 
-	return metaData{
-		Host:             fmt.Sprintf("%s://%s", proto, host),
-		Slug:             r.URL.RequestURI(),
-		DescriptionShort: ds,
-		DescriptionLong:  dl,
-	}
+	dat.Slug = r.URL.Path
+
+	dat.SlugParts = make([]string, 0)
+
+	dat.SlugParts = slices.AppendUniques(dat.SlugParts, strings.Split(dat.Slug, "/")...)
+
+	dat.Title = title
+	dat.Description = description
+
+	return dat
 }

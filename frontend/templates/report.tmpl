@@ -1,0 +1,19 @@
+{{ define "report" }}
+
+{{ template "site-start" . }}
+
+
+<!-- <div
+    class="max-md:max-w-[90%] md:max-w-[80%] lg:max-w-[70%] xl:max-w-[60%] 2xl:max-w-[50%] bg-accent flex flex-col justify-center content-center items-center"> -->
+
+<h1 class="max-lg:text-3xl lg:text-5xl max-lg:pt-20 lg:pt-32 pb-2 mx-auto">
+    Report of <b class="text-primary">{{ .Question }}</b>
+</h1>
+
+{{ template "report-stat" .Stat }}
+
+{{ template "record-domains" .Domains }}
+
+{{ template "site-end" }}
+
+{{ end }}

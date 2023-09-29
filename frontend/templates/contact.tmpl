@@ -1,18 +1,35 @@
 {{ define "contact" }}
-<div class="flex-none max-lg:py-5 lg:py-10 flex flex-col" id="contact">
 
-    <h2 class="text-3xl font-bold mx-auto">Contact</h2>
+{{ template "site-start" . }}
 
-    <h3 class="text-xl mx-auto py-2">Open issue: <a class="link link-primary"
-            href="https://github.com/elmasy-com/columbus/issues">
-            github.com/elmasy-com/columbus/issues</a></h3>
-    <h3 class="text-xl mx-auto py-2">Security issue via email: columbus _at_ elmasy _dot_ com</h3>
+{{ template "hero" .Hero }}
 
-    <h3 class="text-lg">Social:</h3>
-    <ul class="list-disc">
-        <li>Github: <a class="link link-primary" href="https://github.com/elmasy-com/columbus">elmasy-com</a></li>
-        <li>Twitter: <a class="link link-primary" href="https://twitter.com/elmasy_com">elmasy_com</a></li>
-        <li>Mastodon: <a class="link link-primary" href="https://infosec.exchange/@elmasy">elmasy</a></li>
-    </ul>
-</div>
+<div class="max-lg:py-2 lg:py-3"></div>
+
+<ul class="max-md:max-w-[90%] md:max-w-[70%] lg:max-w-[50%] list-disc">
+    <li>
+        Security contact: columbus _at_ elmasy _dot_ com
+    </li>
+    <li>
+        Github:
+        <a class="link link-primary" href="https://github.com/elmasy-com/columbus">
+            elmasy-com
+        </a>
+    </li>
+    <li>
+        Twitter:
+        <a class="link link-primary" href="https://twitter.com/elmasy_com">
+            elmasy_com
+        </a>
+    </li>
+    <li>
+        Mastodon:
+        <a class="link link-primary" href="https://infosec.exchange/@elmasy">
+            elmasy
+        </a>
+    </li>
+</ul>
+
+{{ template "site-end" }}
+
 {{ end }}

@@ -1,0 +1,63 @@
+{{ define "dns-server" }}
+
+{{ template "site-start" . }}
+
+{{ template "hero" .Hero }}
+
+<div class="max-lg:py-2 lg:py-3"></div>
+
+<div class="max-w-[90%] lg:max-w-[80%] xl:max-w-[70%] 2xl:max-w-[60%] flex flex-col justify-start content-center">
+
+    <p class="py-2">
+        The goal of the
+        <a class="link link-primary" href="https://github.com/elmasy-com/columbus/tree/main/dns">
+            Columbus DNS
+        </a>
+        is to make it easy for everybody to contribute to the
+        Columbus Project by setting the DNS server to
+        <code class="text-primary">dns.columbus.elmasy.com</code>
+        while enumerationg subdomains, hunting bugs, etc.
+    </p>
+
+    <div class="my-6 alert alert-warning max-sm:gap-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>Warning: This server is not meant to used as a daily DNS resolver!</span>
+    </div>
+
+    <div class="max-lg:py-2 lg:py-3"></div>
+
+    <h3 class="text-lg font-bold">Server</h3>
+
+    <ul class="list-disc px-8">
+        <li>DNS <code class="text-primary">dns.columbus.elmasy.com</code></li>
+        <li>IPv4 <code class="text-primary">142.132.164.231</code></li>
+        <li>IPv6 <code class="text-primary">2a01:4f8:1c1e:eddd::1</code></li>
+        <li>Protocol <code class="text-primary">TCP</code> and <code class="text-primary">UDP</code>
+        </li>
+    </ul>
+
+    <div class="max-lg:py-2 lg:py-3"></div>
+
+    <h3 class="text-lg font-bold">Examples</h3>
+
+    <div class="w-full mockup-code my-4 shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>dig @142.132.164.231 elmasy.com</code></pre>
+    </div>
+
+    <div class="w-full mockup-code my-4 shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>subfinder -r 142.132.164.231 -d elmasy.com</code></pre>
+    </div>
+
+    <div class="w-full mockup-code my-4 shadow-sm shadow-accent">
+        <pre data-prefix="$"><code>amass enum -tr 142.132.164.231 -d elmasy.com</code></pre>
+    </div>
+
+</div>
+
+
+{{ template "site-end" }}
+
+{{ end }}

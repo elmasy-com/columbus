@@ -26,6 +26,7 @@ paths:
     get:
       tags:
         - domain
+      operationId: GetLookup
       summary: Lookup subdomains for domain.
       description: |
       
@@ -66,6 +67,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StringArray'
+              example:
+                summary: success
+                description: Request is sucessful
+                externalValue: 
             text/plain:
               schema:
                 $ref: '#/components/schemas/String'
@@ -100,10 +105,12 @@ paths:
           description: Bad Gateway. Upstream failed.
         '504':
           description: Gateway Timeout. Upstream response takes too long.
+
   /api/starts/{domain}:
     get:
       tags:
         - domain
+      operationId: GetStarts
       summary: Find domains that start with the given string.
       description: |
       
@@ -172,6 +179,7 @@ paths:
     get:
       tags:
         - domain
+      operationId: GetTLD
       summary: Find TLDs for the given domain.
       description: |
       
@@ -236,6 +244,7 @@ paths:
     get:
       tags:
         - domain
+      operationId: GetHistory
       summary: DNS record history.
       description: |
     
@@ -302,6 +311,7 @@ paths:
       tags:
         - info
       summary: Basic domain statistic
+      operationId: GetStatistics
       description: |
         Basic domain statistic that holds the total number of domains and
         the total number of valid domains.
@@ -333,6 +343,7 @@ paths:
     get:
       tags:
         - tools
+      operationId: GetToolsTLD
       summary: Get the TLD from a FQDN.
       description: |
         Get the TLD part (eg.: `com`) from a FQDN (eg.: `columbus.elmasy.com`).
@@ -385,6 +396,7 @@ paths:
     get:
       tags:
         - tools
+      operationId: GetToolsDomain
       summary: Get the domain from a FQDN.
       description: |
         Get the domain part (eg.: `elmasy.com`) from a FQDN (eg.: `columbus.elmasy.com`).
@@ -434,6 +446,7 @@ paths:
     get:
       tags:
         - tools
+      operationId: GetToolsSubdomain
       summary: Get the subdomain from a FQDN.
       description: |
         Get the subdomain part (eg.: `columbus`) from a FQDN (eg.: `columbus.elmasy.com`).
@@ -483,6 +496,7 @@ paths:
     get:
       tags:
         - tools
+      operationId: GetToolsIsValid
       summary: Returns whether FQDN is a valid domain.
       description: |
         Returns whether FQDN is a valid domain.

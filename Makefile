@@ -14,17 +14,17 @@ GOFLAGS = -tags "netgo,osusergo" -ldflags='$(LDFLAGS)'
 
 # Update go.mod
 update-deps:
-	cd ./dns/ && go mod tidy && go get -u
+	cd ./db/ && go mod tidy && go get -u
 	cd ./server/cmd/ && go mod tidy && go get -u
 	cd ./scanner/ && go mod tidy && go get -u
 	cd ./dns/ && go mod tidy && go get -u
 	cd ./frontend && npm update
 
 release-dirs:
-	if [ ! -d "./release" ];			then mkdir ./release			; fi
-	if [ ! -d "./release/server" ];		then mkdir ./release/server		; fi
-	if [ ! -d "./release/scanner" ];	then mkdir ./release/scanner	; fi
-	if [ ! -d "./release/dns" ];		then mkdir ./release/dns	; fi
+	@if [ ! -d "./release" ];			then mkdir ./release			; fi
+	@if [ ! -d "./release/server" ];	then mkdir ./release/server		; fi
+	@if [ ! -d "./release/scanner" ];	then mkdir ./release/scanner	; fi
+	@if [ ! -d "./release/dns" ];		then mkdir ./release/dns		; fi
 
 
 ##########
@@ -47,10 +47,16 @@ frontend-clean:
 frontend-build: frontend-clean
 	cd frontend/ && npm install
 	echo '{{ define "stylecss" }}' > frontend/templates/stylecss.tmpl
-	cd frontend/ && tailwindcss -o style.css --minify
+	cd frontend/ && tailwindcss -i input.css -o style.css --minify
 	cat frontend/style.css >> frontend/templates/stylecss.tmpl
 	echo '{{ end }}' >> frontend/templates/stylecss.tmpl
 
+frontend-build-dev:
+	@if [ ! -e "./frontend/node_modules" ];	then cd frontend/ && npm install; fi
+	echo '{{ define "stylecss" }}' > frontend/templates/stylecss.tmpl
+	cd frontend/ && tailwindcss -i input.css -o style.css --minify
+	cat frontend/style.css >> frontend/templates/stylecss.tmpl
+	echo '{{ end }}' >> frontend/templates/stylecss.tmpl
 
 ##########
 # server
@@ -68,7 +74,7 @@ server-build: release-dirs server-clean frontend-build
 	go build -o release/server/columbus-server $(GOFLAGS) ./server/cmd/.
 
 # Dev build of the server, use --race flag and build onto ./internal directory
-server-build-dev: release-dirs frontend-build
+server-build-dev: release-dirs frontend-build-dev
 	go build --race -o internal/columbus-server ./server/cmd/.
 
 # Release: build, copy the misc files and create a signed checksum file

@@ -14,8 +14,8 @@ import (
 	"github.com/elmasy-com/columbus/server/config"
 	"github.com/elmasy-com/columbus/server/server/history"
 	"github.com/elmasy-com/columbus/server/server/lookup"
-	"github.com/elmasy-com/columbus/server/server/search"
-	"github.com/elmasy-com/columbus/server/server/stat"
+	"github.com/elmasy-com/columbus/server/server/report"
+	"github.com/elmasy-com/columbus/server/server/statistics"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,18 +59,28 @@ func Run() error {
 
 	router.SetTrustedProxies(config.TrustedProxies)
 
-	router.GET("/", frontend.GetIndex)
+	router.GET("/", frontend.GetSearch)
+	router.GET("/search", frontend.GetSearch)
+
+	router.GET("/api", frontend.GetAPI)
+
+	router.GET("/about", frontend.GetAbout)
+	router.GET("/dns-server", frontend.GetDNSServer)
+	router.GET("/privacy-policy", frontend.GetPrivacyPolicy)
+	router.GET("/contact", frontend.GetContact)
 
 	router.GET("/api/lookup/:domain", lookup.GetApiLookup)
 	router.GET("/api/starts/:domain", lookup.GetApiStarts)
 	router.GET("/api/tld/:domain", lookup.GetApiTLD)
 	router.GET("/api/history/:domain", history.GetApiHistory)
 
-	router.GET("/api/stat", stat.GetApiStat)
-	router.GET("/stat", stat.RedirectStat)
+	router.GET("/api/stat", statistics.GetApiStat)
+	router.GET("/statistics", frontend.GetStatistics)
+	router.GET("/stat", frontend.RedirectStatToStatistics)
 
-	router.GET("/search", search.GetSearchRedirect)
-	router.GET("/search/:domain", search.GetSearch)
+	router.GET("/search/:domain", frontend.GetSearchRedirect)
+	router.GET("/report/:domain", report.GetReport)
+	router.GET("/report", report.RedirectDomainParam)
 
 	router.GET("/api/tools/tld/:fqdn", ToolsTLDGet)
 	router.GET("/api/tools/domain/:fqdn", ToolsDomainGet)
@@ -87,7 +97,13 @@ func Run() error {
 	router.GET("/tools/subdomain/:fqdn", Redirect)
 	router.GET("/tools/isvalid/:fqdn", Redirect)
 
-	router.GET("/swagger/", RedirectSwagger)
+	router.GET("/400", frontend.Get400)
+	router.GET("/404", frontend.Get404)
+	router.GET("/500", frontend.Get500)
+	router.GET("/502", frontend.Get502)
+	router.GET("/504", frontend.Get504)
+
+	router.GET("/sitemap.xml", frontend.GetSitemapXML)
 
 	srv := &http.Server{
 		Addr:    config.Address,

@@ -1,0 +1,54 @@
+{{ define "report-sublist" }}
+
+<div class="max-lg:py-5 lg:py-8 max-md:w-[95%] md:w-[80%] lg:w-[70%] xl:w-[60%] 2xl:w-[50%] flex flex-col justify-center
+content-center items-center">
+
+
+
+    {{ $data := derefSubData . }}
+
+    <details class="menu w-full">
+        <summary class="marker:hidden collapse-arrow">
+            <h2 class="max-lg:text-xl lg:text-3xl ">
+                Subdomain list of {{ $data.Domain }}
+            </h2>
+        </summary>
+        <ul>
+            {{ template "render-sublist" $data.Childs }}
+        </ul>
+    </details>
+
+
+</div>
+{{ end }}
+
+{{ define "render-sublist" }}
+
+{{ range $index, $elem := derefSubDatas . }}
+
+{{ if $elem.Childs }}
+
+<li>
+
+    <details open>
+        {{ if $elem.Domain }}
+        <summary><a href="#{{ $elem.Domain }}">{{ $elem.Sub }}</a></summary>
+        {{ else }}
+        <summary>{{ $elem.Sub }}</summary>
+        {{ end }}
+        <ul class="before:bg-primary">
+            {{ template "render-sublist" .Childs }}
+        </ul>
+    </details>
+
+</li>
+
+{{ else }}
+
+<li><a href="#{{ .Domain }}">{{ $elem.Sub }}</a></li>
+
+{{ end }}
+
+{{ end }}
+
+{{ end }}

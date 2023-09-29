@@ -1,0 +1,27 @@
+{{ define "about" }}
+
+{{ template "site-start" . }}
+
+{{ template "hero" .Hero }}
+
+<div class="max-md:max-w-[90%] md:max-w-[70%] lg:max-w-[50%]">
+
+    <div class="max-lg:py-2 lg:py-3"></div>
+
+    <h2 class="max-lg:text-lg lg:text-xl">
+        Columbus Project is an API-first subdomain discovery service.
+        A blazingly fast subdomain enumeration service with advanced queries.
+    </h2>
+
+    <div class="max-lg:py-2 lg:py-3"></div>
+
+    <h3 class="max-lg:text-base lg:text-lg">
+        The goal of the project is to create an easy to integrate, yet powerful APIs.
+        There are more than 1 billion unique records are stored in the database.
+        Because every domain in MongoDB is indexed in the memory, Columbus can returns the result in seconds.
+        Finding the subdomains for tesla.com took only less than a second for the Lookup endpoint.
+    </h3>
+</div>
+{{ template "site-end" }}
+
+{{ end }}

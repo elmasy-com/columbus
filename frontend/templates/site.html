@@ -1,0 +1,50 @@
+{{ define "site_start" }}
+<!doctype html>
+<html lang="en-US">
+
+<head>
+    {{ template "meta" .Meta }}
+</head>
+
+<body class="bg-secondary max-w-[90%] lg:max-w-[80%] xl:max-w-[60%] 2xl:max-w-[40%] mx-auto">
+
+    {{ template "header" . }}
+
+    <div class=" h-max flex-auto flex flex-col justify-center content-center items-center mx-auto">
+
+
+        <!-- Hero -->
+        {{ template "hero" }}
+
+        <!-- Search Field-->
+        <div class="flex-auto max-lg:w-[90%] lg:w-[50rem] py-12 form-control">
+            <label class="md:hidden label">
+                <span class="label-text">
+                    Type in a domain to find subdomains and DNS records ( eg.:example.com )
+                </span>
+            </label>
+            <form class="join flex justify-center" onsubmit="return redirectSearch();" id="search">
+                <input class="input input-bordered join-item input-primary w-full" type="text" id="searchDomain"
+                    placeholder="Type in a domain to find it's subdomains and it's DNS records ( eg.:example.com )" />
+                <button class="btn join-item btn-primary">Search</button>
+            </form>
+
+        </div>
+
+        <script>
+            function redirectSearch() {
+                // Selecting the input element and get its value 
+                var searchDomain = document.getElementById("searchDomain").value;
+
+                window.location.href = "/search/" + searchDomain;
+                return false;
+            }
+        </script>
+
+    </div>
+
+
+</body>
+
+</html>
+{{ end }}

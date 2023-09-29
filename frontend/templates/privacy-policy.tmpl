@@ -1,0 +1,51 @@
+{{ define "privacy-policy" }}
+
+{{ template "site-start" . }}
+
+{{ template "hero" .Hero }}
+
+<div class="max-lg:py-2 lg:py-3"></div>
+
+<ul class="max-md:max-w-[90%] md:max-w-[70%] lg:max-w-[50%] list-disc">
+    <li>
+        Every request to the server logged and stored for 90 days.
+    </li>
+    <li>
+        The website is using the
+        <a class="link link-primary" href="https://plausible.io/privacy-focused-web-analytics">
+            privacy-friendly
+        </a>
+        Plausible to collect analytics.
+    </li>
+    <li>
+        Successful queries to
+        <code class="text-primary">
+                            /api/lookup
+                        </code>
+        saves only the
+        <code class="text-primary"> domain</code>
+        parameter for further process.
+        <a class="link link-primary"
+            href="https://github.com/elmasy-com/columbus/blob/main/server/server/lookup/lookup.go#L99">
+            See the relevant code here
+        </a>
+        .
+    </li>
+    <li>
+        Failed queries to
+        <code class="text-primary">/api/lookup</code>
+        saves only the
+        <code class="text-primary">domain</code>
+        parameter for
+        further process.
+        <a class="link link-primary"
+            href="https://github.com/elmasy-com/columbus/blob/fa76a24ac667c72120715f5413c3de41b1ac357a/server/server/lookup/lookup.go#L83">
+            See the relevant codehere
+        </a>
+        .
+    </li>
+</ul>
+
+{{ template "site-end" }}
+
+{{ end }}

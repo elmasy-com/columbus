@@ -1,0 +1,46 @@
+{{ define "navbar" }}
+<div class="flex-none flex">
+
+    <!-- Logo -->
+    <div class="flex-auto flex justify-start items-center">
+        <a class="flex items-center text-xl" href="/">
+            <img class="h-8 px-4" src="/logo.svg" alt="Logo">
+            Columbus Project
+        </a>
+    </div>
+
+    <!-- Menu -->
+    <div class="flex-auto flex justify-end items-center">
+
+        <ul class="menu menu-horizontal text-base max-lg:hidden">
+            <li><a href="/search">Search</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/statistics">Statistics</a></li>
+            <li><a href="/api">API</a></li>
+            <li><a href="/dns-server">DNS Server</a></li>
+            <li><a href="/privacy-policy">Privacy Policy</a></li>
+            <li><a href="/contact">Contact</a></li>
+        </ul>
+
+        <!-- Hamburger menu for small screen-->
+        <details class="dropdown dropdown-left dropdown-bottom lg:hidden">
+            <summary tabindex="0" class="btn btn-ghost ">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                </svg>
+            </summary>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a href="/search">Search</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/statistics">Statistics</a></li>
+                <li><a href="/api">API</a></li>
+                <li><a href="/dns-server">DNS Server</a></li>
+                <li><a href="/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </details>
+    </div>
+
+</div>
+{{ end }}

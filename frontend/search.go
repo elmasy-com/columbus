@@ -6,49 +6,32 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/elmasy-com/elnet/dns"
 	"github.com/gin-gonic/gin"
 )
 
-type RecordsData struct {
-	Type  string
-	Value string
-	Time  string
+type searchData struct {
+	Meta metaData
+	Hero heroData
 }
 
-type DomainsData struct {
-	Domain  string
-	Records []RecordsData
+// Redirect old report path
+func GetSearchRedirect(c *gin.Context) {
+
+	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/report/%s", dns.Clean(c.Param("domain"))))
 }
 
-type SearchStat struct {
-	Total              string
-	WithRecords        string
-	WithRecordsPercent string
-	TotalRecords       string
-}
-
-type SearchData struct {
-	Meta     metaData
-	Question string
-	Stat     SearchStat
-	Domains  []DomainsData
-	Unknowns []string
-	Error    error
-}
-
-// Get404 set context.
-// If failed to render the 404.html, returns code 500 with a string: "Internal Server Error".
-//
-// If d is set to a domain, the 404.html will show "No subdomains found for...".
-func GetSearchHtml(c *gin.Context, dat SearchData) {
+func GetSearch(c *gin.Context) {
 
 	buf := new(bytes.Buffer)
-
-	dat.Meta = getMetaData(c.Request, "Columbus Project - Subdomains of "+dat.Question, DescriptionLong)
+	dat := searchData{
+		Meta: getMetaData(c.Request, "Columbus Project - "+DefaultTitle, DefaultDescription),
+		Hero: getHeroData("Columbus Project", DefaultTitle),
+	}
 
 	err := templates.ExecuteTemplate(buf, "search", dat)
 	if err != nil {
-		c.Error(fmt.Errorf("failed to render search.html: %w", err))
+		c.Error(fmt.Errorf("failed to render index.html: %w", err))
 		Get500(c)
 		return
 	}

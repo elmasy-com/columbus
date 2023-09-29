@@ -1,40 +1,9 @@
 {{ define "404" }}
-<!doctype html>
-<html lang="en-US">
 
-<head>
+{{ template "site-start" . }}
 
-    {{ template "meta" .Meta }}
+{{ template "hero" .Hero }}
 
-</head>
+{{ template "site-end" }}
 
-<body class="bg-base-100 max-w-[90%] lg:max-w-[80%] xl:max-w-[60%] 2xl:max-w-[40%] m-auto">
-
-    <div class="min-h-screen flex flex-col">
-
-        <!-- Header-->
-        {{ template "header" }}
-
-        <div class="flex-auto flex flex-col justify-center">
-
-            <img class="w-[20%] mx-auto" src="/logo.svg" alt="Logo" />
-
-            <h1 class="max-lg:text-3xl lg:text-5xl font-bold max-lg:py-3 lg:py-6 mx-auto">404 - Not Found</h1>
-
-            {{ if .Domain }}
-            <h2 class="max-lg:text-2xl lg:text-4xl max-lg:py-3 lg:py-6 mx-auto">
-                No subdomains found for <a class="text-primary">{{ .Domain }}</a>!</h2>
-            {{ else }}
-            <h2 class="max-lg:text-2xl lg:text-4xl text-primary max-lg:py-3 lg:py-6 mx-auto">
-                {{ .Method }} {{ .Meta.Slug }}
-            </h2>
-            {{ end }}
-
-        </div>
-
-    </div>
-
-</body>
-
-</html>
 {{ end }}

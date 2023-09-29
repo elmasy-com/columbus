@@ -1,0 +1,29 @@
+{{ define "api" }}
+
+{{ template "site-start" . }}
+
+
+
+<link rel="stylesheet" type="text/css" href="https://swagger-ui.elmasy.com/swagger-ui.css" />
+
+<div id="swagger-ui" class="bg-white w-full"></div>
+
+<script src="https://swagger-ui.elmasy.com/swagger-ui-bundle.js" crossorigin></script>
+
+
+
+<script>
+    window.onload = () => {
+        window.ui = SwaggerUIBundle({
+            url: '/openapi.yaml',
+            dom_id: '#swagger-ui',
+            validatorUrl: "https://validator.swagger.io/validator",
+            deepLinking: true,
+            docExpansion: "list",
+        });
+    };
+</script>
+
+{{ template "site-end" }}
+
+{{ end }}

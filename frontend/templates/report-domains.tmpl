@@ -1,0 +1,41 @@
+{{ define "record-domains" }}
+
+{{ range . }}
+
+<div id="{{ .Domain }}"
+    class="max-lg:py-5 lg:py-8 max-md:w-[95%] md:w-[80%] lg:w-[70%] xl:w-[60%] 2xl:w-[50%] flex flex-col justify-center content-center items-center">
+
+    <h2 class="self-start max-lg:text-xl lg:text-2xl ">
+        <b class="text-primary">-></b> <b>{{ .Domain}}</b>
+    </h2>
+
+    {{ if .Records }}
+    <div class="overflow-x-auto w-full max-lg:pt-5 lg:pt-8">
+        <table class="table text-center">
+
+            <thead>
+                <tr class="border-b-accent">
+                    <th class="text-primary text-lg">Type</th>
+                    <th class="text-primary text-lg">Value</th>
+                    <th class="text-primary text-lg">Last Seen</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{ range .Records }}
+                <tr class="border-b-accent">
+                    <td>{{ .Type }}</td>
+                    <td class="break-all">{{ .Value }}</td>
+                    <td>{{ .Time }}</td>
+                </tr>
+                {{ end }}
+            </tbody>
+
+        </table>
+    </div>
+    {{ end }}
+
+</div>
+{{ end }}
+
+{{ end }}

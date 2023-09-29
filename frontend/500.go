@@ -3,16 +3,19 @@ package frontend
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type http500Data struct {
-	Meta metaData
-	Date string
+	Meta        metaData
+	Hero        heroData
+	GitHubIssue string
 }
+
+var DefaultGitHubIssue = "?title=Internal%%20Server%%20Error%%20on%%20%s&body=Internal%%20Server%%20Error%%20on%%20%%60%s%%60%%20%%2E"
 
 func Get500Text(c *gin.Context) {
 	c.String(http.StatusInternalServerError, "internal server error")
@@ -27,12 +30,19 @@ func Get500JSON(c *gin.Context) {
 func Get500HTML(c *gin.Context) {
 
 	buf := new(bytes.Buffer)
-	dat := http500Data{Meta: getMetaData(c.Request, "Columbus Project - Internal Server Error", DescriptionLong), Date: time.Now().Format("2006-01-02:15:04:05")}
+	dat := http500Data{
+		Meta: getMetaData(c.Request, "Columbus Project - 500 Internal Server Error", DefaultDescription),
+		Hero: getHeroData("500 Internal Server Error", c.Request.Method+" "+c.Request.URL.Path),
+		GitHubIssue: "https://github.com/elmasy-com/columbus/issues/new?" +
+			"title=" + template.URLQueryEscaper(fmt.Sprintf("Internal Server Error on %s", c.Request.URL.Path)) +
+			"&" +
+			"body=" + template.URLQueryEscaper(fmt.Sprintf("Internal Server Error on %s.", c.Request.URL.Path)),
+	}
 
 	err := templates.ExecuteTemplate(buf, "500", dat)
 	if err != nil {
-		c.Error(fmt.Errorf("failed to render 500.html: %w", err))
-		c.String(http.StatusInternalServerError, "internal server error")
+		c.Error(fmt.Errorf("failed to render 500: %w", err))
+		Get500Text(c)
 		return
 	}
 

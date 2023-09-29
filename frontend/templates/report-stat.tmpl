@@ -1,0 +1,30 @@
+{{ define "report-stat" }}
+
+<h2 class="max-lg:text-xl lg:text-3xl max-lg:py-5 lg:py-8 ">
+    Statistics
+</h2>
+
+<div class="self-center stats stats-vertical sm:stats-horizontal max-sm:py-3 lg:py-6">
+
+    <div class="stat place-items-center">
+        <div class="stat-title">Total Subdomains</div>
+        <div class="stat-value">{{ .Total }}</div>
+        <div class="stat-desc"></div>
+    </div>
+
+    <div class="stat place-items-center">
+        <div class="stat-title">With Records</div>
+        <div class="stat-value">{{ .WithRecords }}</div>
+        <div class="stat-desc">
+            {{ .WithRecords }}/{{ .Total }} ({{ .WithRecordsPercent }}%)
+        </div>
+    </div>
+
+    <div class="stat place-items-center">
+        <div class="stat-title">Total Records</div>
+        <div class="stat-value">{{ .TotalRecords }}</div>
+        <div class="stat-desc"></div>
+    </div>
+
+</div>
+{{ end }}

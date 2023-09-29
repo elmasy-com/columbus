@@ -1,4 +1,4 @@
-package stat
+package statistics
 
 import (
 	"net/http"
@@ -23,10 +23,4 @@ func GetApiStat(c *gin.Context) {
 	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
 
 	c.JSON(http.StatusOK, s)
-}
-
-func RedirectStat(c *gin.Context) {
-
-	c.Header("location", "https://columbus.elmasy.com/#statistics")
-	c.Status(http.StatusTemporaryRedirect)
 }

@@ -1,42 +1,15 @@
 {{ define "400" }}
-<!doctype html>
-<html lang="en-US">
 
-<head>
+{{ template "site-start" . }}
 
-    {{ template "meta" .Meta }}
+{{ template "hero" .Hero }}
 
-</head>
+{{ if ne .Err "bad request" }}
+<h3 class="max-lg:text-xl lg:text-2xl text-accent max-lg:py-2 lg:py-3">
+    Error: {{ .Err }}
+</h3>
+{{ end }}
 
-<body class="bg-base-100 max-w-[90%] lg:max-w-[80%] xl:max-w-[60%] 2xl:max-w-[40%] m-auto">
+{{ template "site-end" }}
 
-    <div class="min-h-screen flex flex-col">
-
-        <!-- Header-->
-        {{ template "header" }}
-
-        <div class="flex-auto flex flex-col justify-center">
-
-            <img class="w-[20%] mx-auto" src="/logo.svg" alt="Logo" />
-
-            <h1 class="max-lg:text-3xl lg:text-5xl font-bold max-lg:py-3 lg:py-6 mx-auto">400 - Bad Request</h1>
-
-
-            <h2 class="max-lg:text-2xl lg:text-4xl text-primary max-lg:py-3 lg:py-6 mx-auto">
-                {{ .Method }} {{ .Meta.Slug }}
-            </h2>
-
-            {{ if ne .Err "bad request" }}
-            <h3 class="max-lg:text-xl lg:text-2xl text-accent max-lg:py-3 lg:py-6 mx-auto">
-                Error: {{ .Err }}
-            </h3>
-            {{ end }}
-
-        </div>
-
-    </div>
-
-</body>
-
-</html>
 {{ end }}
