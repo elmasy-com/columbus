@@ -180,18 +180,18 @@ func recordsUpdaterRoutine(wg *sync.WaitGroup) {
 	}
 }
 
-// RandomDomainUpdater is a function created to run as goroutine in the background.
-// Select random *old* entries (FQDNs) and send it to internalRecordsUpdaterDomainChan to update the records.
-func RandomDomainUpdater(wg *sync.WaitGroup) {
+// OldDomainUpdater is a function created to run as goroutine in the background.
+// Updates the old records, that not updated in the last 30 days
+func OldDomainUpdater(wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
 	for {
 
 		// Get domains that not updated in the last 30 days
-		cursor, err := Domains.Find(context.TODO(), bson.M{"$or": bson.A{bson.M{"updated": bson.M{"$lt": time.Now().Add(720 * time.Hour).Unix()}}, bson.M{"updated": bson.M{"$exists": false}}}})
+		cursor, err := Domains.Find(context.TODO(), bson.M{"$or": bson.A{bson.M{"updated": bson.M{"$lt": time.Now().Add(-720 * time.Hour).Unix()}}, bson.M{"updated": bson.M{"$exists": false}}}})
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "RandomDomainUpdater() failed to find toplist: %s\n", err)
+			fmt.Fprintf(os.Stderr, "OldDomainUpdater() failed to find toplist: %s\n", err)
 			// Wait before the next try
 			time.Sleep(600 * time.Second)
 			continue
@@ -203,15 +203,17 @@ func RandomDomainUpdater(wg *sync.WaitGroup) {
 
 			err = cursor.Decode(d)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "RandomDomainUpdater() failed to find: %s\n", err)
+				fmt.Fprintf(os.Stderr, "OldDomainUpdater() failed to find: %s\n", err)
 				break
 			}
 
-			internalRecordsUpdaterDomainChan <- d.String()
+			if d.Updated < time.Now().UTC().Add(-720*time.Hour).Unix() {
+				internalRecordsUpdaterDomainChan <- d.String()
+			}
 		}
 
 		if err = cursor.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "RandomDomainUpdater() cursor failed: %s\n", err)
+			fmt.Fprintf(os.Stderr, "OldDomainUpdater() cursor failed: %s\n", err)
 		}
 
 		cursor.Close(context.TODO())
@@ -270,6 +272,15 @@ func TopListUpdater(wg *sync.WaitGroup) {
 
 func RecordsUpdater(nworker int, chanSize int) {
 
+	switch chanSize {
+	case 0:
+		panic("Channel size in RecordsUpdater() is 0")
+	case 1:
+		chanSize = 1
+	default:
+		chanSize = chanSize / 2
+	}
+
 	RecordsUpdaterDomainChan = make(chan string, chanSize)
 	internalRecordsUpdaterDomainChan = make(chan string, chanSize)
 	startTime = time.Now()
@@ -282,7 +293,7 @@ func RecordsUpdater(nworker int, chanSize int) {
 	}
 
 	wg.Add(1)
-	go RandomDomainUpdater(wg)
+	go OldDomainUpdater(wg)
 
 	wg.Add(1)
 	go TopListUpdater(wg)
