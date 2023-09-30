@@ -2,10 +2,10 @@
 
 <div class="flex-none breadcrumbs">
 
-    <ul class="px-6" itemscope itemtype="http://schema.org/BreadcrumbList">
+    <ul class="px-6" itemscope="" itemtype="http://schema.org/BreadcrumbList">
 
         {{ range $index, $element := .Meta.SlugParts }}
-        <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"
+        <li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem"
             class="before:text-primary before:opacity-100">
 
             <meta itemprop="position" content="{{ $index }}">
@@ -38,7 +38,8 @@
             </a>
 
             {{ else if eq $element "report" }}
-            <div class="fill-[#DADADB] text-[#DADADB] flex cursor-pointer items-center" itemprop="item">
+            <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
+                href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/search">
 
                 <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
                 <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512">
@@ -47,8 +48,8 @@
                 </svg>
 
                 <span itemprop="name">Report</span>
+            </a>
 
-            </div>
             {{ else if eq $element "about" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
@@ -138,9 +139,10 @@
             </a>
 
             {{ else }}
-            <div class="fill-[#DADADB] text-[#DADADB] flex cursor-pointer items-center" itemprop="item">
+            <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
+                href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}{{ $.Meta.Slug }}">
                 <span itemprop="name">{{ $element }}</span>
-            </div>
+            </a>
             {{ end }}
 
         </li>
