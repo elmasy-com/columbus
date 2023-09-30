@@ -81,8 +81,6 @@ func GetReport(c *gin.Context) {
 		return
 	}
 
-	d = dns.Clean(d)
-
 	// Redirect client to the base domain if FQDN used (eg.: /search/www.example.com -> /search/example.com)
 	if validator.Domain(d) && dns.HasSub(d) {
 		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/report/%s", dns.GetDomain(d)))
