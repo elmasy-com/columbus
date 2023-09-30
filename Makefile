@@ -47,15 +47,19 @@ frontend-clean:
 frontend-build: frontend-clean
 	cd frontend/ && npm install
 	echo '{{ define "stylecss" }}' > frontend/templates/stylecss.tmpl
+	echo '<style>' >> frontend/templates/stylecss.tmpl
 	cd frontend/ && tailwindcss -i input.css -o style.css --minify
 	cat frontend/style.css >> frontend/templates/stylecss.tmpl
+	echo '</style>' >> frontend/templates/stylecss.tmpl
 	echo '{{ end }}' >> frontend/templates/stylecss.tmpl
 
 frontend-build-dev:
 	@if [ ! -e "./frontend/node_modules" ];	then cd frontend/ && npm install; fi
 	echo '{{ define "stylecss" }}' > frontend/templates/stylecss.tmpl
+	echo '<style>' >> frontend/templates/stylecss.tmpl
 	cd frontend/ && tailwindcss -i input.css -o style.css --minify
 	cat frontend/style.css >> frontend/templates/stylecss.tmpl
+	echo '</style>' >> frontend/templates/stylecss.tmpl
 	echo '{{ end }}' >> frontend/templates/stylecss.tmpl
 
 ##########
