@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DefaultTitle       = "A fast, API-first subdomain discovery service with advanced queries."
+	DefaultTitle       = "Advanced subdomain discovery service."
 	DefaultDescription = "Columbus Project is an API-first subdomain discovery service. A blazingly fast subdomain enumeration service with advanced queries."
 )
 

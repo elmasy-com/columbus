@@ -1,34 +1,38 @@
 {{ define "meta" }}
-<meta charset="utf-8">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<meta name="author" content="g0rbe"> 
+<meta name="author" content="g0rbe">
 
 <meta name="description" content="{{ .Description }}">
 <title>
     {{ .Title }}
 </title>
 
-<link rel="canonical" href="{{ .Proto }}://{{ .Host }}{{ .Slug }}"/>
+<meta name="keywords"
+    content="subdomain, subdomain enumeration, subdomain enum, find subdomain, subdomain lookup, subdomain history, subdomain search, subdomain api">
+
+<link rel="canonical" href="{{ .Proto }}://{{ .Host }}{{ .Slug }}">
+<link rel="me" href="https://twitter.com/elmasy_com">
+
 <script defer data-api="/api/event" data-domain="columbus.elmasy.com" src="/js/script.js"></script>
 
-<meta property="og:title" content="{{ .Title }}"/>
-<meta property="og:type" content="website"/>
-<meta property="og:description" content="{{ .Description }}"/>
-<meta property="og:url" content="{{ .Proto }}://{{ .Host }}{{ .Slug }}" />
-<meta property="og:site_name" content="{{ .Host }}"/>
-<meta property="og:image" content="{{ .Proto }}://{{ .Host }}/cover.png"/>
+<meta property="og:title" content="{{ .Title }}">
+<meta property="og:type" content="website">
+<meta property="og:description" content="{{ .Description }}">
+<meta property="og:url" content="{{ .Proto }}://{{ .Host }}{{ .Slug }}">
+<meta property="og:site_name" content="{{ .Host }}">
+<meta property="og:image" content="{{ .Proto }}://{{ .Host }}/cover.png">
 
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="{{ .Title }}"/>
-<meta name="twitter:description" content="{{ .Description }}"/>
-<meta name="twitter:url" content="{{ .Proto }}://{{ .Host }}{{ .Slug }}"/>
-<meta name="twitter:image" content="{{ .Proto }}://{{ .Host }}/cover.png"/>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ .Title }}">
+<meta name="twitter:description" content="{{ .Description }}">
+<meta name="twitter:url" content="{{ .Proto }}://{{ .Host }}{{ .Slug }}">
+<meta name="twitter:image" content="{{ .Proto }}://{{ .Host }}/cover.png">
+<meta name="twitter:site" content="@elmasy_com">
+<meta name="twitter:creator" content="@_g0rbe">
 
 <link rel="shortcut icon" href="{{ .Proto }}://{{ .Host }}/icon.svg">
-
 
 <link rel="apple-touch-icon" sizes="180x180" href="{{ .Proto }}://{{ .Host }}/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ .Proto }}://{{ .Host }}/favicon-32x32.png">
@@ -50,8 +54,6 @@
     }
 </script>
 
-<style>
 {{ template "stylecss" }}
-</style>
 
 {{ end }}
