@@ -20,7 +20,7 @@ func RedirectLookup(c *gin.Context) {
 		c.Header("location", fmt.Sprintf("/api/lookup/%s", c.Param("domain")))
 		c.Status(http.StatusMovedPermanently)
 	} else {
-		c.Header("location", fmt.Sprintf("/search/%s", c.Param("domain")))
+		c.Header("location", fmt.Sprintf("/report/%s", c.Param("domain")))
 		c.Status(http.StatusMovedPermanently)
 	}
 }
