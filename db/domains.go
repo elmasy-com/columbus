@@ -470,7 +470,7 @@ func DomainsUpdatedRecently(d string) (bool, error) {
 		return false, fault.ErrTLDOnly
 	}
 
-	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}, {Key: "updated", Value: bson.M{"$gt": time.Now().Add(-12 * time.Hour).Unix()}}}
+	filter := bson.D{{Key: "domain", Value: p.Domain}, {Key: "tld", Value: p.TLD}, {Key: "sub", Value: p.Sub}, {Key: "updated", Value: bson.M{"$gt": time.Now().UTC().Add(-12 * time.Hour).Unix()}}}
 
 	dom := new(Domain)
 
