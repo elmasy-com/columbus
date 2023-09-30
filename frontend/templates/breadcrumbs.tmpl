@@ -1,12 +1,16 @@
 {{ define "breadcrumbs" }}
 
 <div class="flex-none breadcrumbs">
+
     <ul class="px-6" itemscope itemtype="http://schema.org/BreadcrumbList">
-        {{ range .Meta.SlugParts }}
+
+        {{ range $index, $element := .Meta.SlugParts }}
         <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"
             class="before:text-primary before:opacity-100">
 
-            {{ if eq . "" }}
+            <meta itemprop="position" content="{{ $index }}">
+
+            {{ if eq $element "" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item" href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/">
 
@@ -19,7 +23,7 @@
                 <span itemprop="name">Home</span>
             </a>
 
-            {{ else if eq . "search" }}
+            {{ else if eq $element "search" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
                 href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/search">
@@ -33,7 +37,7 @@
                 <span itemprop="name">Search</span>
             </a>
 
-            {{ else if eq . "report" }}
+            {{ else if eq $element "report" }}
             <div class="fill-[#DADADB] text-[#DADADB] flex cursor-pointer items-center" itemprop="item">
 
                 <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
@@ -45,7 +49,7 @@
                 <span itemprop="name">Report</span>
 
             </div>
-            {{ else if eq . "about" }}
+            {{ else if eq $element "about" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
                 href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/about">
@@ -59,7 +63,7 @@
                 <span itemprop="name">About</span>
             </a>
 
-            {{ else if eq . "statistics" }}
+            {{ else if eq $element "statistics" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
                 href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/statstics">
@@ -74,7 +78,7 @@
                 <span itemprop="name">Statistics</span>
             </a>
 
-            {{ else if eq . "api" }}
+            {{ else if eq $element "api" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item" href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/api">
 
@@ -88,7 +92,7 @@
                 <span itemprop="name">API</span>
             </a>
 
-            {{ else if eq . "dns-server" }}
+            {{ else if eq $element "dns-server" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
                 href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/dns-server">
@@ -103,7 +107,7 @@
                 <span itemprop="name">DNS Server</span>
             </a>
 
-            {{ else if eq . "privacy-policy" }}
+            {{ else if eq $element "privacy-policy" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
                 href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/privacy-policy">
@@ -118,7 +122,7 @@
                 <span itemprop="name">Privacy Policy</span>
             </a>
 
-            {{ else if eq . "contact" }}
+            {{ else if eq $element "contact" }}
 
             <a class="fill-[#DADADB] text-[#DADADB]" itemprop="item"
                 href="{{ $.Meta.Proto }}://{{ $.Meta.Host }}/contact">
@@ -135,7 +139,7 @@
 
             {{ else }}
             <div class="fill-[#DADADB] text-[#DADADB] flex cursor-pointer items-center" itemprop="item">
-                <span itemprop="name">{{ . }}</span>
+                <span itemprop="name">{{ $element }}</span>
             </div>
             {{ end }}
 
