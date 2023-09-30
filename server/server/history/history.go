@@ -100,7 +100,7 @@ func GetApiHistory(c *gin.Context) {
 
 	// Cache for 10 minutes, domains are not updated this often,
 	// but caching saves a lot of processing power.
-	c.Header("cache-control", "public, max-age=600")
+	c.Header("cache-control", "public, max-age=600, must-revalidate, stale-if-error=604800")
 	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
 
 	c.JSON(http.StatusOK, hs)

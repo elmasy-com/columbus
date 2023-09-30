@@ -100,7 +100,7 @@ func GetApiLookup(c *gin.Context) {
 	}
 
 	// Cache for 10 minutes.
-	c.Header("cache-control", "public, max-age=600")
+	c.Header("cache-control", "public, max-age=600, must-revalidate, stale-if-error=604800")
 	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
 	c.Header("vary", "Accept")
 
@@ -153,7 +153,7 @@ func GetApiTLD(c *gin.Context) {
 	}
 
 	// Cache for 10 minutes.
-	c.Header("cache-control", "public, max-age=600")
+	c.Header("cache-control", "public, max-age=600, must-revalidate, stale-if-error=604800")
 	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
 	c.Header("vary", "Accept")
 
@@ -212,7 +212,7 @@ func GetApiStarts(c *gin.Context) {
 	}
 
 	// Cache for 10 minutes.
-	c.Header("cache-control", "public, max-age=600")
+	c.Header("cache-control", "public, max-age=600, must-revalidate, stale-if-error=604800")
 	c.Header("expires", time.Now().UTC().Add(600*time.Second).Format(time.RFC1123))
 	c.Header("vary", "Accept")
 
