@@ -1,0 +1,6 @@
+{{ define "robots-txt" }}
+User-agent: *
+Disallow:
+
+Sitemap: {{ .Proto }}://{{ .Host }}/sitemap.xml
+{{ end }}

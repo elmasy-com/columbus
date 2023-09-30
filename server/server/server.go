@@ -104,6 +104,7 @@ func Run() error {
 	router.GET("/504", frontend.Get504)
 
 	router.GET("/sitemap.xml", frontend.GetSitemapXML)
+	router.GET("/robots.txt", frontend.GetRobotsTxt)
 
 	srv := &http.Server{
 		Addr:    config.Address,
