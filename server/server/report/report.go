@@ -148,6 +148,22 @@ func GetReport(c *gin.Context) {
 		return doms[i].Sub < doms[j].Sub
 	})
 
+	for l := range doms {
+
+		sort.Slice(doms[l].Records, func(i, j int) bool {
+
+			if doms[l].Records[i].Type < doms[l].Records[j].Type {
+				return true
+			}
+
+			if doms[l].Records[i].Time > doms[l].Records[j].Time {
+				return true
+			}
+
+			return false
+		})
+	}
+
 	_, err = db.TopListInsert(d)
 	if err != nil {
 		c.Error(fmt.Errorf("failed to insert topList: %w", err))
