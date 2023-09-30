@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -90,12 +91,18 @@ func GetSitemapXML(c *gin.Context) {
 
 	v.URL = append(v.URL, chaosURLs...)
 
-	out, err := xml.Marshal(v)
+	out, err := xml.MarshalIndent(v, "", "    ")
 	if err != nil {
 		c.Error(fmt.Errorf("failed to marshal sitemap.xml: %w", err))
 		Get500(c)
 		return
 	}
 
-	c.Data(http.StatusOK, "application/xml", out)
+	r := []byte(xml.Header)
+	r = append(r, out...)
+
+	c.Header("cache-control", "public, max-age=86400, stale-while-revalidate=86400, stale-if-error=604800")
+	c.Header("expires", time.Now().UTC().Add(604800*time.Second).Format(time.RFC1123))
+
+	c.Data(http.StatusOK, "application/xml", r)
 }
