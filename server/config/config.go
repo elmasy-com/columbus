@@ -68,7 +68,7 @@ func Parse(path string) error {
 
 	DNSServers = c.DNSServers
 
-	servers, err := dns.NewServersStr(dns.DefaultMaxRetries, time.Duration(dns.DefaultQueryTimeoutSec), c.DNSServers...)
+	servers, err := dns.NewServersStr(dns.DefaultMaxRetries, time.Duration(dns.DefaultQueryTimeoutSec)*time.Second, c.DNSServers...)
 	if err != nil {
 		return fmt.Errorf("failed to update DNS servers: %w", err)
 	}
