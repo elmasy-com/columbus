@@ -152,15 +152,17 @@ func GetReport(c *gin.Context) {
 
 		sort.Slice(doms[l].Records, func(i, j int) bool {
 
-			if doms[l].Records[i].Type < doms[l].Records[j].Type {
+			switch {
+			case doms[l].Records[i].Type < doms[l].Records[j].Type:
 				return true
+			case doms[l].Records[i].Type > doms[l].Records[j].Type:
+				return false
+			case doms[l].Records[i].Time > doms[l].Records[j].Time:
+				return true
+			default:
+				return false
 			}
 
-			if doms[l].Records[i].Time > doms[l].Records[j].Time {
-				return true
-			}
-
-			return false
 		})
 	}
 
