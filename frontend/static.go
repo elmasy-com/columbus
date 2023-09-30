@@ -63,12 +63,12 @@ func GetStatic(c *gin.Context) {
 	}
 
 	if isImage(extension) {
-		// Cache images for a week
-		c.Header("cache-control", "public, max-age=604800")
+		// Cache images for a week, stale can be used for +1 day while revalidate and +7 days in case of error
+		c.Header("cache-control", "public, max-age=604800, stale-while-revalidate=86400, stale-if-error=604800")
 		c.Header("expires", time.Now().UTC().Add(604800*time.Second).Format(time.RFC1123))
 	} else {
 		// Cache others for a day
-		c.Header("cache-control", "public, max-age=86400")
+		c.Header("cache-control", "public, max-age=86400, stale-while-revalidate=86400, stale-if-error=604800")
 		c.Header("expires", time.Now().UTC().Add(86400*time.Second).Format(time.RFC1123))
 	}
 

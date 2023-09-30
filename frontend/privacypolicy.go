@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,6 +32,9 @@ func GetPrivacyPolicy(c *gin.Context) {
 		Get500(c)
 		return
 	}
+
+	c.Header("cache-control", "public, max-age=3600, stale-while-revalidate=3600, stale-if-error=604800")
+	c.Header("expires", time.Now().UTC().Add(3600*time.Second).Format(time.RFC1123))
 
 	c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
 }

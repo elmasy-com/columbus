@@ -79,7 +79,7 @@ func GetReport(c *gin.Context, dat ReportData) {
 	}
 
 	// Cache for an hour.
-	c.Header("cache-control", "public, max-age=3600")
+	c.Header("cache-control", "public, max-age=3600, stale-while-revalidate=86400, stale-if-error=604800")
 	c.Header("expires", time.Now().UTC().Add(3600*time.Second).Format(time.RFC1123))
 
 	c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
