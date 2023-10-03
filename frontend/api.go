@@ -3,51 +3,49 @@ package frontend
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/yaml.v3"
 )
 
-type exampleObject struct {
-	Summary     string `yaml:"summary"`
-	Description string `yaml:"description"`
-}
+// type exampleObject struct {
+// 	Summary     string `yaml:"summary"`
+// 	Description string `yaml:"description"`
+// }
 
-type mediaTypeObject struct {
-	Schema  map[string]string `yaml:"schema"`
-	Example exampleObject     `yaml:"example"`
-}
+// type mediaTypeObject struct {
+// 	Schema  map[string]string `yaml:"schema"`
+// 	Example exampleObject     `yaml:"example"`
+// }
 
-type parameterObject struct {
-	Name        string `yaml:"name"`
-	In          string `yaml:"in"`
-	Description string `yaml:"description"`
-	Required    bool   `yaml:"required"`
-}
+// type parameterObject struct {
+// 	Name        string `yaml:"name"`
+// 	In          string `yaml:"in"`
+// 	Description string `yaml:"description"`
+// 	Required    bool   `yaml:"required"`
+// }
 
-type responseObject struct {
-	Description string                     `yaml:"description"`
-	Content     map[string]mediaTypeObject `yaml:"content"`
-}
+// type responseObject struct {
+// 	Description string                     `yaml:"description"`
+// 	Content     map[string]mediaTypeObject `yaml:"content"`
+// }
 
-type operationObject struct {
-	OperationID string                    `yaml:"operationId"`
-	Summary     string                    `yaml:"summary"`
-	Description string                    `yaml:"description"`
-	Parameters  []parameterObject         `yaml:"parameters"`
-	Responses   map[string]responseObject `yaml:"responses"`
-}
+// type operationObject struct {
+// 	OperationID string                    `yaml:"operationId"`
+// 	Summary     string                    `yaml:"summary"`
+// 	Description string                    `yaml:"description"`
+// 	Parameters  []parameterObject         `yaml:"parameters"`
+// 	Responses   map[string]responseObject `yaml:"responses"`
+// }
 
-type pathItemObject struct {
-	Get operationObject `yaml:"get"`
-}
+// type pathItemObject struct {
+// 	Get operationObject `yaml:"get"`
+// }
 
-type paths struct {
-	Paths map[string]pathItemObject `yaml:"paths"`
-}
+// type paths struct {
+// 	Paths map[string]pathItemObject `yaml:"paths"`
+// }
 
 type apiData struct {
 	Meta   metaData
@@ -55,25 +53,25 @@ type apiData struct {
 	Err    string
 }
 
-func fetchOpenAPIPaths(uri string) (paths, error) {
+// func fetchOpenAPIPaths(uri string) (paths, error) {
 
-	resp, err := http.Get(uri)
-	if err != nil {
-		return paths{}, fmt.Errorf("failed to query %s: %w", uri, err)
-	}
-	defer resp.Body.Close()
+// 	resp, err := http.Get(uri)
+// 	if err != nil {
+// 		return paths{}, fmt.Errorf("failed to query %s: %w", uri, err)
+// 	}
+// 	defer resp.Body.Close()
 
-	out, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return paths{}, fmt.Errorf("failed to read body: %w", err)
-	}
+// 	out, err := io.ReadAll(resp.Body)
+// 	if err != nil {
+// 		return paths{}, fmt.Errorf("failed to read body: %w", err)
+// 	}
 
-	ps := new(paths)
+// 	ps := new(paths)
 
-	err = yaml.Unmarshal(out, ps)
+// 	err = yaml.Unmarshal(out, ps)
 
-	return *ps, err
-}
+// 	return *ps, err
+// }
 
 // func GetAPI(c *gin.Context) {
 
