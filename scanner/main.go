@@ -108,7 +108,7 @@ infiniteLoop:
 				switch {
 				case strings.Contains(err.Error(), "NonFatalErrors"):
 					// NonFatalErrors means failed to convert one entry, skip it and continue
-					fmt.Fprintf(os.Stderr, "Non fatal error occured while getting domains at index %d (continue from index %d): %s\n", LogIndex.Load()+n, LogIndex.Load()+n+1, err)
+					fmt.Fprintf(os.Stderr, "Non fatal error occurred while getting domains at index %d (continue from index %d): %s\n", LogIndex.Load()+n, LogIndex.Load()+n+1, err)
 					// Add +1 to n to skip the failed entry
 					n += 1
 				case strings.Contains(err.Error(), "429 Too Many Requests"):

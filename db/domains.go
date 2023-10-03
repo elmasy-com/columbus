@@ -276,7 +276,7 @@ func DomainsDomains(d string, days int) ([]Domain, error) {
 //
 // Domain d must be a valid Second Level Domain (eg.: "example").
 //
-// NOTE: This function not validate adn Clean() d!
+// NOTE: This function not validate and Clean() d!
 func DomainsTLD(d string) ([]string, error) {
 
 	// Use Find() to find every shard of the domain

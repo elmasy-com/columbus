@@ -8,7 +8,7 @@ import (
 )
 
 // UDPStart starts the UDP server.
-// If any error occured in ListenAndServe(), sends an os.Interupt into stopSignal.
+// If any error occurred in ListenAndServe(), sends an os.Interupt into stopSignal.
 func UDPStart(listen string, stopSignal chan os.Signal) *dns.Server {
 
 	udpHandler := dns.NewServeMux()
