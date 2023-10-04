@@ -7,7 +7,6 @@ import (
 
 	"github.com/elmasy-com/columbus/db"
 	"github.com/elmasy-com/columbus/server/config"
-	"github.com/elmasy-com/columbus/server/server"
 )
 
 var (
@@ -57,7 +56,7 @@ func main() {
 	go db.RecordsUpdater(config.DomainWorker, config.DomainBuffer)
 
 	fmt.Printf("Starting HTTP server...\n")
-	if err := server.Run(); err != nil {
+	if err := ServerRun(); err != nil {
 		fmt.Fprintf(os.Stderr, "Server failed: %s\n", err)
 		os.Exit(1)
 	} else {

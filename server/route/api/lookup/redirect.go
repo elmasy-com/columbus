@@ -1,4 +1,4 @@
-package server
+package lookup
 
 import (
 	"fmt"
@@ -6,12 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-func Redirect(c *gin.Context) {
-
-	c.Header("location", fmt.Sprintf("/api%s", c.Request.RequestURI))
-	c.Status(http.StatusMovedPermanently)
-}
 
 func RedirectLookup(c *gin.Context) {
 
@@ -23,10 +17,4 @@ func RedirectLookup(c *gin.Context) {
 		c.Header("location", fmt.Sprintf("/report/%s", c.Param("domain")))
 		c.Status(http.StatusMovedPermanently)
 	}
-}
-
-func RedirectSwagger(c *gin.Context) {
-
-	c.Header("location", "https://columbus.elmasy.com/swagger/index.html")
-	c.Status(http.StatusTemporaryRedirect)
 }

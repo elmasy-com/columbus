@@ -75,11 +75,11 @@ server-clean:
 
 # Prod build of the server
 server-build: release-dirs server-clean frontend-build
-	go build -o release/server/columbus-server $(GOFLAGS) ./server/cmd/.
+	go build -o release/server/columbus-server $(GOFLAGS) ./server/.
 
 # Dev build of the server, use --race flag and build onto ./internal directory
 server-build-dev: release-dirs frontend-build-dev
-	go build --race -o internal/columbus-server ./server/cmd/.
+	go build --race -o internal/columbus-server ./server/.
 
 # Release: build, copy the misc files and create a signed checksum file
 server-release: server-clean server-build

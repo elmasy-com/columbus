@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"context"
@@ -12,10 +12,14 @@ import (
 
 	"github.com/elmasy-com/columbus/frontend"
 	"github.com/elmasy-com/columbus/server/config"
-	"github.com/elmasy-com/columbus/server/server/history"
-	"github.com/elmasy-com/columbus/server/server/lookup"
-	"github.com/elmasy-com/columbus/server/server/report"
-	"github.com/elmasy-com/columbus/server/server/statistics"
+	"github.com/elmasy-com/columbus/server/route/api"
+	"github.com/elmasy-com/columbus/server/route/api/history"
+	"github.com/elmasy-com/columbus/server/route/api/lookup"
+	"github.com/elmasy-com/columbus/server/route/api/starts"
+	"github.com/elmasy-com/columbus/server/route/api/statistics"
+	"github.com/elmasy-com/columbus/server/route/api/tld"
+	"github.com/elmasy-com/columbus/server/route/api/tools"
+	"github.com/elmasy-com/columbus/server/route/report"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,7 +45,7 @@ func GinLog(param gin.LogFormatterParams) string {
 
 // ServerRun start the http server and block.
 // The server can stopped with a SIGINT.
-func Run() error {
+func ServerRun() error {
 
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
@@ -70,8 +74,8 @@ func Run() error {
 	router.GET("/contact", frontend.GetContact)
 
 	router.GET("/api/lookup/:domain", lookup.GetApiLookup)
-	router.GET("/api/starts/:domain", lookup.GetApiStarts)
-	router.GET("/api/tld/:domain", lookup.GetApiTLD)
+	router.GET("/api/starts/:domain", starts.GetApiStarts)
+	router.GET("/api/tld/:domain", tld.GetApiTLD)
 	router.GET("/api/history/:domain", history.GetApiHistory)
 
 	router.GET("/api/stat", statistics.GetApiStat)
@@ -82,20 +86,20 @@ func Run() error {
 	router.GET("/report/:domain", report.GetReport)
 	router.GET("/report", report.RedirectDomainParam)
 
-	router.GET("/api/tools/tld/:fqdn", ToolsTLDGet)
-	router.GET("/api/tools/domain/:fqdn", ToolsDomainGet)
-	router.GET("/api/tools/subdomain/:fqdn", ToolsSubdomainGet)
-	router.GET("/api/tools/isvalid/:fqdn", ToolsIsValidGet)
+	router.GET("/api/tools/tld/:fqdn", tools.ToolsTLDGet)
+	router.GET("/api/tools/domain/:fqdn", tools.ToolsDomainGet)
+	router.GET("/api/tools/subdomain/:fqdn", tools.ToolsSubdomainGet)
+	router.GET("/api/tools/isvalid/:fqdn", tools.ToolsIsValidGet)
 
 	// Redirect to /search/:domain
-	router.GET("/lookup/:domain", RedirectLookup)
+	router.GET("/lookup/:domain", lookup.RedirectLookup)
 
 	// Permanent Redirect
-	router.GET("/tld/:domain", Redirect)
-	router.GET("/tools/tld/:fqdn", Redirect)
-	router.GET("/tools/domain/:fqdn", Redirect)
-	router.GET("/tools/subdomain/:fqdn", Redirect)
-	router.GET("/tools/isvalid/:fqdn", Redirect)
+	router.GET("/tld/:domain", api.RedirectOldRoutes)
+	router.GET("/tools/tld/:fqdn", api.RedirectOldRoutes)
+	router.GET("/tools/domain/:fqdn", api.RedirectOldRoutes)
+	router.GET("/tools/subdomain/:fqdn", api.RedirectOldRoutes)
+	router.GET("/tools/isvalid/:fqdn", api.RedirectOldRoutes)
 
 	router.GET("/400", frontend.Get400)
 	router.GET("/404", frontend.Get404)
