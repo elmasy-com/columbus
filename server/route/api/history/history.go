@@ -4,34 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/elmasy-com/columbus/db"
 	"github.com/elmasy-com/columbus/fault"
+	"github.com/elmasy-com/columbus/server/common"
 	"github.com/gin-gonic/gin"
 )
 
 type History struct {
 	Domain  string
 	Records []db.Record
-}
-
-// Return the "days" query parameter.
-// If not set, returns -1.
-func getQueryDays(c *gin.Context) (int, error) {
-
-	// Parse days query param
-	daysStr, daysSet := c.GetQuery("days")
-	if !daysSet {
-		return -1, nil
-	}
-
-	if daysStr == "" {
-		return -2, fmt.Errorf("empty")
-	}
-
-	return strconv.Atoi(daysStr)
 }
 
 func GetApiHistory(c *gin.Context) {
@@ -42,7 +25,7 @@ func GetApiHistory(c *gin.Context) {
 	d := c.Param("domain")
 
 	// Parse days query param
-	days, err := getQueryDays(c)
+	days, err := common.ParseQueryDays(c)
 	if err != nil {
 		c.Error(fault.ErrInvalidDays)
 		c.JSON(http.StatusBadRequest, fault.ErrInvalidDays)
@@ -94,6 +77,11 @@ func GetApiHistory(c *gin.Context) {
 	hs := make([]History, 0, len(doms))
 
 	for i := range doms {
+
+		// Send domains to db.UpdaterChan channel if not full to update the DNS records.
+		if len(db.UpdaterChan) < cap(db.UpdaterChan) {
+			db.UpdaterChan <- db.UpdateableDomain{Domain: doms[i].String(), Type: db.UpdateExistingDomain}
+		}
 
 		hs = append(hs, History{Domain: doms[i].String(), Records: doms[i].Records})
 	}

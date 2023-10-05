@@ -10,6 +10,7 @@ import (
 	"github.com/elmasy-com/columbus/db"
 	"github.com/elmasy-com/columbus/fault"
 	"github.com/elmasy-com/columbus/server/common"
+	"github.com/elmasy-com/elnet/dns"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,7 @@ func GetApiLookup(c *gin.Context) {
 	var err error
 
 	// Parse domain param
-	d := c.Param("domain")
+	d := dns.Clean(c.Param("domain"))
 
 	// Parse days query param
 	days, err := common.ParseQueryDays(c)
@@ -74,6 +75,22 @@ func GetApiLookup(c *gin.Context) {
 			c.JSON(http.StatusNotFound, fault.ErrNotFound)
 		}
 		return
+	}
+
+	for i := range subs {
+
+		var dom string
+
+		if subs[i] == "" {
+			dom = d
+		} else {
+			dom = fmt.Sprintf("%s.%s", subs[i], d)
+		}
+
+		// Send domains to db.UpdaterChan channel if not full to update the DNS records.
+		if len(db.UpdaterChan) < cap(db.UpdaterChan) {
+			db.UpdaterChan <- db.UpdateableDomain{Domain: dom, Type: db.UpdateExistingDomain}
+		}
 	}
 
 	_, err = db.TopListInsert(d)

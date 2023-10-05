@@ -45,6 +45,11 @@ func getReportDataDomains(doms []db.Domain) []frontend.DomainsData {
 
 	for i := range doms {
 
+		// Send domains to db.UpdaterChan channel if not full to update the DNS records.
+		if len(db.UpdaterChan) < cap(db.UpdaterChan) {
+			db.UpdaterChan <- db.UpdateableDomain{Domain: doms[i].String(), Type: db.UpdateExistingDomain}
+		}
+
 		dd := frontend.DomainsData{
 			Domain: doms[i].String(),
 		}
