@@ -12,6 +12,7 @@ type Config struct {
 	LogName       string     `yaml:"LogName"`
 	MongoURI      string     `yaml:"MongoURI"`
 	InsertWorkers int        `yaml:"InsertWorkers"`
+	SkipDomain    bool       `yaml:"SkipDomain"`
 	Log           *ctlog.Log `yaml:"-"`
 }
 
