@@ -3,7 +3,7 @@ module github.com/elmasy-com/columbus
 go 1.19
 
 require (
-	github.com/elmasy-com/elnet v0.0.0-20230823204247-b56e13a02a28
+	github.com/elmasy-com/elnet v0.0.0-20231005043936-3cdddebc3772
 	github.com/elmasy-com/slices v0.0.0-20230919000417-87219f95e1d1
 	github.com/g0rbe/slitu v1.0.6
 	github.com/gin-gonic/gin v1.9.1

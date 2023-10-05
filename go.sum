@@ -13,6 +13,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/elmasy-com/elnet v0.0.0-20230823204247-b56e13a02a28 h1:mNxaXLeaXJa+QfrKxRDIi66ybE5XGo7zXNGdHZssRVI=
 github.com/elmasy-com/elnet v0.0.0-20230823204247-b56e13a02a28/go.mod h1:Ipw9Fan6o3EEYTJQ4qFRKM66WbNPRCi+dHVyAS08WT8=
+github.com/elmasy-com/elnet v0.0.0-20231005043936-3cdddebc3772 h1:5s9S8ko89QSfXtogn/J1mb48RHQzHita+OTEXibKXYU=
+github.com/elmasy-com/elnet v0.0.0-20231005043936-3cdddebc3772/go.mod h1:Ipw9Fan6o3EEYTJQ4qFRKM66WbNPRCi+dHVyAS08WT8=
 github.com/elmasy-com/slices v0.0.0-20230919000417-87219f95e1d1 h1:bOc25yGWmeGaqZV225IuYWN/a2g0ulICZJmvcMWyiJo=
 github.com/elmasy-com/slices v0.0.0-20230919000417-87219f95e1d1/go.mod h1:0DO/qXOgrnrXU44i+9JQzusxxxx6WPPW7WQeV/RJLLM=
 github.com/g0rbe/slitu v1.0.6 h1:Gl1VZRM/7uTXAhDoK+vOaUo2FYyhJ45Ue0KAszmG6f0=
