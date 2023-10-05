@@ -100,18 +100,21 @@ func DomainsInsert(d string) (bool, error) {
 //
 // If domain is invalid, returns fault.ErrInvalidDomain.
 // If failed to get parts of d (eg.: d is a TLD), returns ault.ErrGetPartsFailed.
-func DomainsInsertWithRecord(d string) error {
+func DomainsInsertWithRecord(d string, ignoreUpdated bool) error {
 
 	d = dns.Clean(d)
 
-	// DomainsUpdatedRecently check if d is valid.
-	updated, err := DomainsUpdatedRecently(d)
-	if err != nil {
-		return err
-	}
+	if !ignoreUpdated {
 
-	if updated {
-		return nil
+		// DomainsUpdatedRecently check if d is valid.
+		updated, err := DomainsUpdatedRecently(d)
+		if err != nil {
+			return err
+		}
+
+		if updated {
+			return nil
+		}
 	}
 
 	records, err := dns.QueryAll(d)
@@ -124,7 +127,7 @@ func DomainsInsertWithRecord(d string) error {
 	}
 
 	if len(records) == 0 {
-		return DomainsUpdateUpdatedTime(d)
+		return nil
 	}
 
 	_, err = DomainsInsert(d)
@@ -258,11 +261,6 @@ func DomainsDomains(d string, days int) ([]Domain, error) {
 		}
 
 		doms = append(doms, *r)
-
-		// Send to db.RecordsUpdaterDomainChan if the channle if not full to update the DNS records.
-		if len(RecordsUpdaterDomainChan) < cap(RecordsUpdaterDomainChan) {
-			RecordsUpdaterDomainChan <- r.String()
-		}
 	}
 
 	if err := cursor.Err(); err != nil {

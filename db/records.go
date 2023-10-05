@@ -4,17 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
-	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/elmasy-com/columbus/fault"
 	"github.com/elmasy-com/elnet/dns"
 	"github.com/elmasy-com/elnet/validator"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Record is the schema used to store a record in Domain
@@ -22,26 +18,6 @@ type Record struct {
 	Type  uint16 `bson:"type" json:"type"`
 	Value string `bson:"value" json:"value"`
 	Time  int64  `bson:"time" json:"time"`
-}
-
-var (
-	RecordsUpdaterDomainChan         chan string
-	internalRecordsUpdaterDomainChan chan string
-	totalUpdated                     atomic.Uint64
-	startTime                        time.Time
-)
-
-// increaseTotalUpdated add +1 to totalUpdated and print a status message.
-func increaseTotalUpdated() {
-
-	totalUpdated.Add(1)
-
-	if totalUpdated.Load()%100000 == 0 {
-		if totalUpdated.Load() != 0 {
-			fmt.Printf("Updated %d domain records in %s\n", totalUpdated.Load(), time.Since(startTime))
-		}
-	}
-
 }
 
 // RecordsInsert insert (if not exist) or updates the "date" field for record with "type" t and "value" v.
@@ -150,153 +126,4 @@ func RecordsUpdate(d string, ignoreUpdated bool) error {
 	}
 
 	return nil
-}
-
-// recordsUpdaterRoutine reads from DomainChan and internalDomainChan
-// and updates the FQDN coming from the channel.
-func recordsUpdaterRoutine(wg *sync.WaitGroup) {
-
-	defer wg.Done()
-
-	for {
-
-		var d string
-
-		select {
-		case dom := <-RecordsUpdaterDomainChan:
-			d = dom
-
-		case dom := <-internalRecordsUpdaterDomainChan:
-			d = dom
-		}
-
-		increaseTotalUpdated()
-
-		// d is a FQDN
-		err := RecordsUpdate(d, false)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to update DNS records for %s: %s\n", d, err)
-		}
-	}
-}
-
-// OldDomainUpdater is a function created to run as goroutine in the background.
-// Updates the old records, that not updated in the last 30 days
-func OldDomainUpdater(wg *sync.WaitGroup) {
-
-	defer wg.Done()
-
-	for {
-
-		// Get domains that not updated in the last 30 days
-		cursor, err := Domains.Find(context.TODO(), bson.M{"$or": bson.A{bson.M{"updated": bson.M{"$lt": time.Now().Add(-720 * time.Hour).Unix()}}, bson.M{"updated": bson.M{"$exists": false}}}})
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "OldDomainUpdater() failed to find toplist: %s\n", err)
-			// Wait before the next try
-			time.Sleep(600 * time.Second)
-			continue
-		}
-
-		for cursor.Next(context.TODO()) {
-
-			d := new(Domain)
-
-			err = cursor.Decode(d)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "OldDomainUpdater() failed to find: %s\n", err)
-				break
-			}
-
-			if d.Updated < time.Now().UTC().Add(-720*time.Hour).Unix() {
-				internalRecordsUpdaterDomainChan <- d.String()
-			}
-		}
-
-		if err = cursor.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "OldDomainUpdater() cursor failed: %s\n", err)
-		}
-
-		cursor.Close(context.TODO())
-	}
-}
-
-// TopListUpdater is a function created to run as goroutine in the background.
-// Updates the domains and it subdomains in topList collection by sending every entries into internalRecordsUpdaterDomainChan.
-// This function uses concurrent goroutines and print only/ignores any error.
-func TopListUpdater(wg *sync.WaitGroup) {
-
-	defer wg.Done()
-
-	for {
-
-		time.Sleep(time.Duration(rand.Intn(49) * int(time.Hour)))
-
-		start := time.Now()
-
-		cursor, err := TopList.Find(context.TODO(), bson.M{}, options.Find().SetSort(bson.M{"count": -1}))
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "TopListUpdater() failed to find toplist: %s\n", err)
-			continue
-		}
-
-		for cursor.Next(context.TODO()) {
-
-			d := new(TopListSchema)
-
-			err = cursor.Decode(d)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "TopListUpdater() failed to find: %s\n", err)
-				break
-			}
-
-			ds, err := DomainsLookupFull(d.Domain, -1)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "TopListUpdater() failed to lookup full for %s: %s\n", d.Domain, err)
-				continue
-			}
-
-			for i := range ds {
-				internalRecordsUpdaterDomainChan <- ds[i]
-			}
-
-		}
-
-		if err = cursor.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "TopListUpdater() cursor failed: %s\n", err)
-		}
-
-		cursor.Close(context.TODO())
-		fmt.Printf("TopListUpdater(): Finished updating topList in %s\n", time.Since(start))
-	}
-}
-
-func RecordsUpdater(nworker int, chanSize int) {
-
-	switch chanSize {
-	case 0:
-		panic("Channel size in RecordsUpdater() is 0")
-	case 1:
-		chanSize = 1
-	default:
-		chanSize = chanSize / 2
-	}
-
-	RecordsUpdaterDomainChan = make(chan string, chanSize)
-	internalRecordsUpdaterDomainChan = make(chan string, chanSize)
-	startTime = time.Now()
-
-	wg := new(sync.WaitGroup)
-
-	for i := 0; i < nworker; i++ {
-		wg.Add(1)
-		go recordsUpdaterRoutine(wg)
-	}
-
-	wg.Add(1)
-	go OldDomainUpdater(wg)
-
-	wg.Add(1)
-	go TopListUpdater(wg)
-
-	wg.Wait()
 }
