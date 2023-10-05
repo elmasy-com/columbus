@@ -10,7 +10,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.15.1
+  version: dev
 servers:
   - url: https://columbus.elmasy.com
 tags:
@@ -306,6 +306,42 @@ paths:
         '504':
           description: Gateway Timeout. Upstream response takes too long.
 
+  /api/insert/{domain}:
+    put:
+      tags:
+        - domain
+      operationId: PutAPIInsert
+      summary: Insert domain into the database.
+      description: |
+        This endpoint technically suggest a domain to the server.
+        
+        It is required to have at least one valid DNS record for the domain to insert (eg.: `A` or `AAAA`).
+        The domain is sent to an underlying channel, so returns fast, but the client will not get informed about the result.
+        If the underlying channel is full, hangs until there is free space to send.
+        
+        This endpoint uses blacklist and rate limiter to prevent garbage and resource exhaustion
+        (eg.: sending invalid domain results a block for some time).
+      parameters:
+        - name: domain
+          in: path
+          description: Domain to insert.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Invalid domain.
+        '403':
+          description: Client IP blocked.
+        '500':
+          description: Internal Server Error.
+        '502':
+          description: Bad Gateway. Upstream failed.
+        '504':
+          description: Gateway Timeout. Upstream response takes too long.
+          
   /api/stat:
     get:
       tags:

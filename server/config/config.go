@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/elmasy-com/elnet/blocklist"
 	"github.com/elmasy-com/elnet/dns"
 	"gopkg.in/yaml.v3"
 )
@@ -20,6 +21,10 @@ type conf struct {
 	DNSServers     []string `yaml:"DNSServers"`
 	DomainWorker   int      `yaml:"DomainWorker"`
 	DomainBuffer   int      `yaml:"DomainBuffer"`
+	InsertWorker   int      `yaml:"InsertWorker"`
+	InsertBuffer   int      `yaml:"InsertBuffer"`
+	BlocklistSize  int      `yaml:"BlocklistSize"`
+	BlockTime      int      `yaml:"BlockTime"`
 }
 
 var (
@@ -32,6 +37,11 @@ var (
 	DNSServers     []string
 	DomainWorker   int
 	DomainBuffer   int
+	InsertWorker   int
+	InsertBuffer   int
+	BlocklistSize  int
+	BlockTime      time.Duration
+	Blocklist      *blocklist.Blocklist
 )
 
 // Parse parses the config file in path and gill the global variables.
@@ -86,6 +96,32 @@ func Parse(path string) error {
 	}
 
 	DomainBuffer = c.DomainBuffer
+
+	if c.InsertWorker == 0 {
+		c.InsertWorker = runtime.NumCPU()
+	}
+
+	InsertWorker = c.InsertWorker
+
+	if c.InsertBuffer == 0 {
+		c.InsertBuffer = 10000
+	}
+
+	InsertBuffer = c.InsertBuffer
+
+	if c.BlocklistSize == 0 {
+		c.BlocklistSize = 1000
+	}
+
+	BlocklistSize = c.BlocklistSize
+
+	if c.BlockTime == 0 {
+		c.BlockTime = 600
+	}
+
+	BlockTime = time.Duration(c.BlockTime) * time.Second
+
+	Blocklist = blocklist.NewBlocklist(BlockTime, int64(BlocklistSize))
 
 	return nil
 }

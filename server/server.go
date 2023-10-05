@@ -14,6 +14,7 @@ import (
 	"github.com/elmasy-com/columbus/server/config"
 	"github.com/elmasy-com/columbus/server/route/api"
 	"github.com/elmasy-com/columbus/server/route/api/history"
+	"github.com/elmasy-com/columbus/server/route/api/insert"
 	"github.com/elmasy-com/columbus/server/route/api/lookup"
 	"github.com/elmasy-com/columbus/server/route/api/starts"
 	"github.com/elmasy-com/columbus/server/route/api/statistics"
@@ -90,6 +91,8 @@ func ServerRun() error {
 	router.GET("/api/tools/domain/:fqdn", tools.ToolsDomainGet)
 	router.GET("/api/tools/subdomain/:fqdn", tools.ToolsSubdomainGet)
 	router.GET("/api/tools/isvalid/:fqdn", tools.ToolsIsValidGet)
+
+	router.PUT("/api/insert/:domain", insert.PutApiInsert)
 
 	// Redirect to /search/:domain
 	router.GET("/lookup/:domain", lookup.RedirectLookup)
