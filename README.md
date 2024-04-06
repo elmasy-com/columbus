@@ -254,3 +254,8 @@ HTML + [tailwindcss](https://tailwindcss.com/) + [DaisyUI](https://daisyui.com/)
 ## VHS
 
 Create gifs with [VHS](https://github.com/charmbracelet/vhs).
+
+
+## Author
+
+[System administrator service and Cybersecurity for small and medium-sized businesses in and around Győr.](https://www.gorbe.io/)
